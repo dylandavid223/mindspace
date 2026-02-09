@@ -1,0 +1,277 @@
+/* Responsive Styles */
+
+@media (max-width: 1200px) {
+    .container {
+        max-width: 100%;
+        padding: 15px;
+    }
+    
+    .hero h1 {
+        font-size: 3rem;
+    }
+    
+    .assessment-models {
+        grid-template-columns: repeat(2, 1fr);
+    }
+    
+    .modules-grid {
+        grid-template-columns: repeat(2, 1fr);
+    }
+}
+
+@media (max-width: 768px) {
+    .header {
+        flex-direction: column;
+        text-align: center;
+        gap: 20px;
+        padding: 20px 0;
+    }
+    
+    .logo {
+        flex-direction: column;
+        text-align: center;
+    }
+    
+    .hero h1 {
+        font-size: 2.2rem;
+    }
+    
+    .hero-subtitle {
+        font-size: 1.1rem;
+        padding: 0 10px;
+    }
+    
+    .category-selector {
+        grid-template-columns: 1fr;
+        gap: 15px;
+    }
+    
+    .assessment-models {
+        grid-template-columns: 1fr;
+        gap: 20px;
+    }
+    
+    .assessment-panel {
+        padding: 20px;
+    }
+    
+    .model-card {
+        padding: 20px;
+    }
+    
+    .question-panel {
+        padding: 20px;
+    }
+    
+    .question-text {
+        font-size: 1.4rem;
+        min-height: 80px;
+    }
+    
+    .option-btn {
+        padding: 15px;
+        font-size: 1rem;
+    }
+    
+    .nav-btn {
+        padding: 12px 25px;
+        font-size: 1rem;
+    }
+    
+    .results-grid {
+        grid-template-columns: 1fr;
+        gap: 20px;
+    }
+    
+    .modules-grid {
+        grid-template-columns: 1fr;
+        gap: 20px;
+    }
+    
+    .module-card {
+        padding: 20px;
+    }
+    
+    .module-header {
+        flex-direction: column;
+        text-align: center;
+        gap: 15px;
+    }
+    
+    .module-icon {
+        width: 60px;
+        height: 60px;
+        font-size: 24px;
+    }
+    
+    .module-card h4 {
+        font-size: 1.3rem;
+    }
+    
+    .brain-container {
+        height: 300px;
+    }
+    
+    .brain-overlay {
+        left: 10px;
+        bottom: 10px;
+        padding: 10px;
+        max-width: 200px;
+    }
+    
+    .brain-overlay h4 {
+        font-size: 1rem;
+    }
+    
+    .brain-overlay p {
+        font-size: 0.8rem;
+    }
+    
+    .panel-title {
+        font-size: 1.5rem;
+    }
+    
+    .results-title {
+        font-size: 1.8rem;
+    }
+}
+
+@media (max-width: 480px) {
+    .logo-text {
+        font-size: 2rem;
+    }
+    
+    .hero h1 {
+        font-size: 1.8rem;
+    }
+    
+    .hero {
+        padding: 30px 15px;
+    }
+    
+    .start-assessment-btn {
+        padding: 12px 25px;
+        font-size: 1rem;
+    }
+    
+    .category-card {
+        padding: 20px;
+    }
+    
+    .category-icon {
+        width: 60px;
+        height: 60px;
+        font-size: 28px;
+    }
+    
+    .category-card h3 {
+        font-size: 1.4rem;
+    }
+    
+    .navigation-buttons {
+        flex-direction: column;
+    }
+    
+    .nav-btn {
+        width: 100%;
+        justify-content: center;
+    }
+    
+    .notification {
+        left: 10px;
+        right: 10px;
+        max-width: none;
+    }
+}
+
+/* Print Styles */
+@media print {
+    .neural-network-bg,
+    .brain-overlay,
+    .notification,
+    .start-assessment-btn,
+    .nav-btn,
+    .start-module-btn,
+    .module-tags,
+    .footer p:last-child {
+        display: none !important;
+    }
+    
+    body {
+        background: white !important;
+        color: black !important;
+    }
+    
+    .container {
+        max-width: 100%;
+        padding: 0;
+    }
+    
+    .hero, .assessment-panel, .question-panel, .results-panel, .module-card {
+        border: 1px solid #ddd;
+        box-shadow: none;
+        background: white !important;
+        color: black !important;
+    }
+    
+    .logo-text, .panel-title, .results-title {
+        background: none !important;
+        color: black !important;
+        -webkit-text-fill-color: black !important;
+    }
+    
+    .brain-container {
+        height: 300px;
+        border: 1px solid #ddd;
+    }
+}
+
+/* Dark mode adjustments */
+@media (prefers-color-scheme: dark) {
+    :root {
+        --dark-bg: #0a0a0a;
+        --darker-bg: #050505;
+        --card-bg: rgba(40, 40, 40, 0.8);
+    }
+}
+
+/* High contrast mode */
+@media (prefers-contrast: high) {
+    :root {
+        --text-primary: #000000;
+        --text-secondary: #333333;
+        --neuro-blue: #0000ff;
+        --neuro-purple: #800080;
+    }
+    
+    body {
+        background: #ffffff;
+    }
+    
+    .category-card, .model-card, .result-card, .module-card {
+        border: 2px solid #000000;
+    }
+}
+
+/* Reduced motion */
+@media (prefers-reduced-motion: reduce) {
+    *,
+    *::before,
+    *::after {
+        animation-duration: 0.01ms !important;
+        animation-iteration-count: 1 !important;
+        transition-duration: 0.01ms !important;
+    }
+    
+    .neural-node {
+        animation: none;
+    }
+    
+    .region-active {
+        animation: none;
+    }
+    
+    .path-active {
+        animation: none;
+    }
+}

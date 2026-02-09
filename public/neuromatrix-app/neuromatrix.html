@@ -1,0 +1,233 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>NeuroMatrix - Advanced Mind Mapping & Potential Discovery</title>
+    
+    <!-- External Libraries -->
+    <script src="https://cdn.jsdelivr.net/npm/cloudinary-core@2.11.4/cloudinary-core-shrinkwrap.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/three@0.128.0/examples/js/controls/OrbitControls.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.10.4/gsap.min.js"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&family=Space+Grotesk:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    
+    <!-- Local CSS -->
+    <link rel="stylesheet" href="css/main.css">
+    <link rel="stylesheet" href="css/brain-visualization.css">
+    <link rel="stylesheet" href="css/responsive.css">
+</head>
+<body>
+    <!-- Neural Background -->
+    <div class="neural-network-bg" id="neuralBg"></div>
+
+    <!-- Main Container -->
+    <div class="container">
+        <!-- Header -->
+        <header class="header">
+            <div class="logo">
+                <div class="logo-icon">
+                    <i class="fas fa-brain"></i>
+                </div>
+                <div>
+                    <h1 class="logo-text">NeuroMatrix</h1>
+                    <p class="tagline">Advanced Mind Mapping & Cognitive Potential Discovery</p>
+                </div>
+            </div>
+            <div class="user-profile" id="userProfile" style="display: none;">
+                <div class="avatar">
+                    <i class="fas fa-user-circle"></i>
+                </div>
+            </div>
+        </header>
+
+        <!-- Hero Section -->
+        <section class="hero" id="heroSection">
+            <h1>Discover Your Cognitive Blueprint</h1>
+            <p class="hero-subtitle">
+                Advanced psychological assessment using multiple established models to map your unique 
+                cognitive patterns, personality traits, and untapped potential across different life stages.
+            </p>
+            <button class="start-assessment-btn" id="startJourneyBtn">
+                <i class="fas fa-rocket"></i> Begin Cognitive Mapping
+            </button>
+        </section>
+
+        <!-- Age Category Selector -->
+        <section class="category-selector" id="categorySelector" style="display: none;">
+            <div class="category-card child" data-category="child">
+                <div class="category-icon">
+                    <i class="fas fa-child"></i>
+                </div>
+                <h3>Child Explorer</h3>
+                <p>Developmental focus on cognitive growth, creativity, and foundational learning patterns</p>
+                <div class="category-age">Ages 5-12</div>
+            </div>
+
+            <div class="category-card teen" data-category="teen">
+                <div class="category-icon">
+                    <i class="fas fa-user-graduate"></i>
+                </div>
+                <h3>Teen Innovator</h3>
+                <p>Identity formation, social cognition, academic optimization, and emerging talents</p>
+                <div class="category-age">Ages 13-19</div>
+            </div>
+
+            <div class="category-card young-adult" data-category="young-adult">
+                <div class="category-icon">
+                    <i class="fas fa-lightbulb"></i>
+                </div>
+                <h3>Young Adult Visionary</h3>
+                <p>Career development, emotional intelligence, relationship building, and peak performance</p>
+                <div class="category-age">Ages 20-35</div>
+            </div>
+
+            <div class="category-card adult" data-category="adult">
+                <div class="category-icon">
+                    <i class="fas fa-chart-line"></i>
+                </div>
+                <h3>Adult Strategist</h3>
+                <p>Leadership skills, financial intelligence, legacy building, and holistic success</p>
+                <div class="category-age">Ages 36-59</div>
+            </div>
+
+            <div class="category-card senior" data-category="senior">
+                <div class="category-icon">
+                    <i class="fas fa-crown"></i>
+                </div>
+                <h3>Senior Sage</h3>
+                <p>Wisdom integration, knowledge transfer, cognitive maintenance, and life reflection</p>
+                <div class="category-age">Ages 60+</div>
+            </div>
+        </section>
+
+        <!-- Assessment Panel -->
+        <section class="assessment-panel" id="assessmentPanel" style="display: none;">
+            <div class="panel-header">
+                <h2 class="panel-title">Select Assessment Models</h2>
+                <div class="selected-category" id="selectedCategory"></div>
+            </div>
+            
+            <div class="assessment-models" id="assessmentModels">
+                <!-- Models will be dynamically loaded -->
+            </div>
+        </section>
+
+        <!-- Question Panel -->
+        <section class="question-panel" id="questionPanel" style="display: none;">
+            <div class="question-header">
+                <div class="question-progress">
+                    <div class="progress-bar">
+                        <div class="progress-fill" id="progressFill"></div>
+                    </div>
+                    <span id="questionCounter">Question 1/20</span>
+                </div>
+                <div class="question-text" id="questionText">
+                    Loading question...
+                </div>
+            </div>
+
+            <div class="options-grid" id="optionsGrid">
+                <!-- Options will be dynamically inserted here -->
+            </div>
+
+            <div class="navigation-buttons">
+                <button class="nav-btn prev-btn" id="prevBtn">
+                    <i class="fas fa-arrow-left"></i> Previous
+                </button>
+                <button class="nav-btn next-btn" id="nextBtn">
+                    Next <i class="fas fa-arrow-right"></i>
+                </button>
+            </div>
+        </section>
+
+        <!-- Results Panel -->
+        <section class="results-panel" id="resultsPanel" style="display: none;">
+            <div class="results-header">
+                <h2 class="results-title">Your Cognitive Blueprint</h2>
+                <p class="results-subtitle">Based on advanced psychological assessment across multiple models</p>
+            </div>
+
+           <!-- Brain Visualization -->
+<div class="brain-container">
+    <div class="chart-controls">
+        <button class="chart-toggle-btn" id="toggleChartBtn">
+            <i class="fas fa-chart-bar"></i> Show Chart
+        </button>
+        <button class="chart-toggle-btn" id="toggleLegendBtn">
+            <i class="fas fa-info-circle"></i> Legend
+        </button>
+    </div>
+    
+    <canvas id="brainCanvas"></canvas>
+    
+    <div class="brain-overlay">
+        <h4><i class="fas fa-brain"></i> Neural Activation Map</h4>
+        <p>Your dominant cognitive patterns visualized</p>
+        <div class="insights" id="brainInsights">
+            <!-- Insights will be dynamically added here -->
+        </div>
+    </div>
+</div>
+
+            <!-- Results Grid -->
+            <div class="results-grid" id="resultsGrid">
+                <!-- Results will be dynamically inserted here -->
+            </div>
+
+            <div class="navigation-buttons">
+                <button class="nav-btn prev-btn" id="backToAssessmentBtn">
+                    <i class="fas fa-redo"></i> Take Another Assessment
+                </button>
+                <button class="nav-btn next-btn" id="viewTrainingBtn">
+                    View Training Modules <i class="fas fa-arrow-right"></i>
+                </button>
+            </div>
+        </section>
+
+        <!-- Training Modules -->
+        <section class="training-modules" id="trainingModules" style="display: none;">
+            <div class="panel-header">
+                <h2 class="panel-title">Personalized Training Modules</h2>
+                <p>Based on your assessment results</p>
+            </div>
+
+            <div class="modules-grid" id="modulesGrid">
+                <!-- Modules will be dynamically inserted here -->
+            </div>
+        </section>
+
+        <!-- Footer -->
+        <footer class="footer">
+            <p>NeuroMatrix &copy; 2026 | Advanced Cognitive Assessment Platform</p>
+            <p>Powered by established psychological models and machine learning algorithms</p>
+            <p style="margin-top: 20px; font-size: 0.8rem; opacity: 0.7;">
+                No personal data is stored. All assessments are processed locally on your device.
+            </p>
+        </footer>
+    </div>
+
+    <!-- Notification -->
+    <div class="notification" id="notification">
+        <div class="notification-icon">
+            <i class="fas fa-brain"></i>
+        </div>
+        <h4 id="notificationTitle">Notification</h4>
+        <p id="notificationMessage">Message content</p>
+    </div>
+
+   <!-- Local JavaScript -->
+<script src="data/questions.js"></script>
+<script src="data/modules.js"></script>
+<script src="js/neural-background.js"></script>
+<script src="js/brain-visualization.js"></script>
+<script src="js/brain-chart.js"></script> 
+<script src="js/assessments.js"></script>
+<script src="js/training-modules.js"></script>
+<script src="js/main.js"></script>
+</body>
+</html>

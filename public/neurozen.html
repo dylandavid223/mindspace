@@ -1,0 +1,3201 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>NeuroZen 3D Therapy Bot</title>
+    <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;500;700;900&family=Inter:wght@300;400;500;600&family=Source+Code+Pro:wght@400;500&display=swap" rel="stylesheet">
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        :root {
+            --primary: #0a0e17;
+            --secondary: #1a1f38;
+            --accent-cyan: #00d4ff;
+            --accent-purple: #9d4edd;
+            --accent-coral: #ff6b6b;
+            --accent-green: #00ff88;
+            --accent-yellow: #ffd700;
+            --bg-dark: #0f1419;
+            --text-primary: #e6f1ff;
+            --text-secondary: #8892b0;
+            --glass-bg: rgba(26, 31, 56, 0.7);
+            --glass-border: rgba(0, 212, 255, 0.1);
+        }
+
+        body {
+            font-family: 'Inter', sans-serif;
+            background: var(--bg-dark);
+            color: var(--text-primary);
+            overflow: hidden;
+            height: 100vh;
+        }
+
+        /* Animated Background */
+        .bg-animation {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: 
+                radial-gradient(ellipse at 20% 80%, rgba(0, 212, 255, 0.15) 0%, transparent 50%),
+                radial-gradient(ellipse at 80% 20%, rgba(157, 78, 221, 0.15) 0%, transparent 50%),
+                radial-gradient(ellipse at 40% 40%, rgba(255, 107, 107, 0.1) 0%, transparent 50%);
+            animation: bgPulse 8s ease-in-out infinite;
+            z-index: -2;
+        }
+
+        @keyframes bgPulse {
+            0%, 100% { opacity: 0.5; transform: scale(1); }
+            50% { opacity: 0.8; transform: scale(1.05); }
+        }
+
+        /* Grid Overlay */
+        .grid-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-image: 
+                linear-gradient(rgba(0, 212, 255, 0.03) 1px, transparent 1px),
+                linear-gradient(90deg, rgba(0, 212, 255, 0.03) 1px, transparent 1px);
+            background-size: 50px 50px;
+            z-index: -1;
+            pointer-events: none;
+        }
+
+        /* Main Layout */
+        .app-container {
+            display: grid;
+            grid-template-columns: 280px 1fr;
+            grid-template-rows: 70px 1fr 60px;
+            height: 100vh;
+            gap: 20px;
+            padding: 20px;
+        }
+
+        /* Header */
+        .header {
+            grid-column: 1 / -1;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 0 30px;
+            background: var(--glass-bg);
+            backdrop-filter: blur(10px);
+            border: 1px solid var(--glass-border);
+            border-radius: 20px;
+            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.3), inset 0 1px 0 rgba(255, 255, 255, 0.1);
+        }
+
+        .logo {
+            display: flex;
+            align-items: center;
+            gap: 15px;
+        }
+
+        .logo-icon {
+            width: 45px;
+            height: 45px;
+            background: linear-gradient(135deg, var(--accent-cyan), var(--accent-purple));
+            border-radius: 12px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 24px;
+            animation: logoGlow 3s ease-in-out infinite;
+        }
+
+        @keyframes logoGlow {
+            0%, 100% { box-shadow: 0 0 20px rgba(0, 212, 255, 0.5); }
+            50% { box-shadow: 0 0 40px rgba(157, 78, 221, 0.8); }
+        }
+
+        .logo-text {
+            font-family: 'Orbitron', monospace;
+            font-size: 24px;
+            font-weight: 700;
+            background: linear-gradient(90deg, var(--accent-cyan), var(--accent-purple));
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+
+        .header-controls {
+            display: flex;
+            gap: 15px;
+            align-items: center;
+        }
+
+        .emergency-btn {
+            background: linear-gradient(135deg, var(--accent-coral), #ff4757);
+            border: none;
+            padding: 12px 24px;
+            border-radius: 30px;
+            color: white;
+            font-family: 'Orbitron', monospace;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            animation: emergencyPulse 2s infinite;
+        }
+
+        @keyframes emergencyPulse {
+            0%, 100% { box-shadow: 0 0 0 0 rgba(255, 107, 107, 0.7); }
+            50% { box-shadow: 0 0 0 10px rgba(255, 107, 107, 0); }
+        }
+
+        .emergency-btn:hover {
+            transform: scale(1.05);
+            box-shadow: 0 0 30px rgba(255, 107, 107, 0.8);
+        }
+
+        .icon-btn {
+            width: 45px;
+            height: 45px;
+            border-radius: 12px;
+            background: rgba(255, 255, 255, 0.05);
+            border: 1px solid var(--glass-border);
+            color: var(--accent-cyan);
+            cursor: pointer;
+            transition: all 0.3s ease;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 20px;
+        }
+
+        .icon-btn:hover {
+            background: rgba(0, 212, 255, 0.1);
+            transform: translateY(-2px);
+            box-shadow: 0 5px 20px rgba(0, 212, 255, 0.3);
+        }
+
+        /* Sidebar */
+        .sidebar {
+            background: var(--glass-bg);
+            backdrop-filter: blur(10px);
+            border: 1px solid var(--glass-border);
+            border-radius: 20px;
+            padding: 25px;
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+            overflow-y: auto;
+        }
+
+        .nav-item {
+            display: flex;
+            align-items: center;
+            gap: 15px;
+            padding: 15px 20px;
+            border-radius: 12px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            color: var(--text-secondary);
+            border: 1px solid transparent;
+        }
+
+        .nav-item:hover, .nav-item.active {
+            background: rgba(0, 212, 255, 0.1);
+            border-color: var(--accent-cyan);
+            color: var(--accent-cyan);
+            transform: translateX(5px);
+        }
+
+        .nav-item.active {
+            background: linear-gradient(90deg, rgba(0, 212, 255, 0.2), transparent);
+            box-shadow: 0 0 20px rgba(0, 212, 255, 0.2);
+        }
+
+        .nav-icon {
+            font-size: 20px;
+            width: 30px;
+            text-align: center;
+        }
+
+        .nav-text {
+            font-weight: 500;
+            font-size: 14px;
+        }
+
+        /* Main Content */
+        .main-content {
+            background: var(--glass-bg);
+            backdrop-filter: blur(10px);
+            border: 1px solid var(--glass-border);
+            border-radius: 20px;
+            overflow: hidden;
+            position: relative;
+            display: flex;
+            flex-direction: column;
+        }
+
+        .content-area {
+            flex: 1;
+            overflow-y: auto;
+            padding: 30px;
+            position: relative;
+        }
+
+        /* 3D Canvas Container */
+        #canvas-container {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            z-index: 0;
+        }
+
+        .overlay-ui {
+            position: relative;
+            z-index: 10;
+            pointer-events: none;
+        }
+
+        .overlay-ui > * {
+            pointer-events: auto;
+        }
+
+        /* Dashboard Cards */
+        .dashboard-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 20px;
+            margin-bottom: 30px;
+        }
+
+        .neuro-card {
+            background: rgba(26, 31, 56, 0.8);
+            backdrop-filter: blur(10px);
+            border: 1px solid rgba(0, 212, 255, 0.2);
+            border-radius: 20px;
+            padding: 25px;
+            transition: all 0.3s ease;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .neuro-card::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            height: 3px;
+            background: linear-gradient(90deg, var(--accent-cyan), var(--accent-purple));
+            opacity: 0;
+            transition: opacity 0.3s ease;
+        }
+
+        .neuro-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 20px 40px rgba(0, 0, 0, 0.4), 0 0 40px rgba(0, 212, 255, 0.1);
+            border-color: var(--accent-cyan);
+        }
+
+        .neuro-card:hover::before {
+            opacity: 1;
+        }
+
+        .card-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 15px;
+        }
+
+        .card-title {
+            font-family: 'Orbitron', monospace;
+            font-size: 14px;
+            color: var(--accent-cyan);
+            text-transform: uppercase;
+            letter-spacing: 1px;
+        }
+
+        .card-value {
+            font-family: 'Source Code Pro', monospace;
+            font-size: 32px;
+            font-weight: 700;
+            color: var(--text-primary);
+        }
+
+        .card-subtitle {
+            font-size: 12px;
+            color: var(--text-secondary);
+            margin-top: 5px;
+        }
+
+        /* Stress Indicator */
+        .stress-meter {
+            display: flex;
+            align-items: center;
+            gap: 15px;
+            margin-top: 10px;
+        }
+
+        .stress-bar {
+            flex: 1;
+            height: 8px;
+            background: rgba(255, 255, 255, 0.1);
+            border-radius: 10px;
+            overflow: hidden;
+            position: relative;
+        }
+
+        .stress-fill {
+            height: 100%;
+            border-radius: 10px;
+            transition: all 0.5s ease;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .stress-fill::after {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: linear-gradient(90deg, transparent, rgba(255,255,255,0.3), transparent);
+            animation: shimmer 2s infinite;
+        }
+
+        @keyframes shimmer {
+            0% { transform: translateX(-100%); }
+            100% { transform: translateX(100%); }
+        }
+
+        .stress-low { background: linear-gradient(90deg, var(--accent-cyan), var(--accent-green)); }
+        .stress-med { background: linear-gradient(90deg, var(--accent-yellow), var(--accent-coral)); }
+        .stress-high { background: linear-gradient(90deg, var(--accent-coral), #ff006e); }
+
+        /* Therapy Section */
+        .therapy-section {
+            display: none;
+        }
+
+        .therapy-section.active {
+            display: block;
+            animation: fadeIn 0.5s ease;
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(20px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        .section-title {
+            font-family: 'Orbitron', monospace;
+            font-size: 28px;
+            margin-bottom: 25px;
+            background: linear-gradient(90deg, var(--accent-cyan), var(--accent-purple));
+            --webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+
+        .technique-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 20px;
+        }
+
+        .technique-card {
+            background: rgba(26, 31, 56, 0.6);
+            border: 1px solid rgba(0, 212, 255, 0.1);
+            border-radius: 16px;
+            padding: 25px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .technique-card::after {
+            content: '';
+            position: absolute;
+            top: -50%;
+            left: -50%;
+            width: 200%;
+            height: 200%;
+            background: linear-gradient(45deg, transparent, rgba(255,255,255,0.05), transparent);
+            transform: rotate(45deg);
+            transition: all 0.5s;
+            opacity: 0;
+        }
+
+        .technique-card:hover::after {
+            animation: hologramScan 1.5s ease-in-out;
+        }
+
+        @keyframes hologramScan {
+            0% { transform: translateX(-100%) translateY(-100%) rotate(45deg); opacity: 0; }
+            50% { opacity: 1; }
+            100% { transform: translateX(100%) translateY(100%) rotate(45deg); opacity: 0; }
+        }
+
+        .technique-card:hover {
+            border-color: var(--accent-cyan);
+            transform: translateY(-3px);
+            box-shadow: 0 10px 30px rgba(0, 212, 255, 0.2);
+        }
+
+        .technique-icon {
+            width: 60px;
+            height: 60px;
+            background: linear-gradient(135deg, rgba(0, 212, 255, 0.2), rgba(157, 78, 221, 0.2));
+            border-radius: 15px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 28px;
+            margin-bottom: 15px;
+            border: 1px solid rgba(0, 212, 255, 0.3);
+        }
+
+        .technique-name {
+            font-family: 'Orbitron', monospace;
+            font-size: 18px;
+            margin-bottom: 8px;
+            color: var(--text-primary);
+        }
+
+        .technique-desc {
+            font-size: 14px;
+            color: var(--text-secondary);
+            line-height: 1.6;
+        }
+
+        .technique-duration {
+            display: inline-block;
+            margin-top: 15px;
+            padding: 6px 12px;
+            background: rgba(0, 212, 255, 0.1);
+            border-radius: 20px;
+            font-size: 12px;
+            color: var(--accent-cyan);
+            font-family: 'Source Code Pro', monospace;
+        }
+
+        /* Active Session Overlay */
+        .session-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(10, 14, 23, 0.95);
+            z-index: 1000;
+            display: none;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            backdrop-filter: blur(20px);
+        }
+
+        .session-overlay.active {
+            display: flex;
+            animation: fadeIn 0.5s ease;
+        }
+
+        .breathing-circle {
+            width: 300px;
+            height: 300px;
+            border-radius: 50%;
+            background: radial-gradient(circle, rgba(0, 212, 255, 0.3), transparent 70%);
+            border: 2px solid var(--accent-cyan);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            position: relative;
+            box-shadow: 0 0 60px rgba(0, 212, 255, 0.5);
+        }
+
+        .breathing-inner {
+            width: 200px;
+            height: 200px;
+            border-radius: 50%;
+            background: radial-gradient(circle, rgba(157, 78, 221, 0.4), transparent);
+            border: 1px solid var(--accent-purple);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-family: 'Orbitron', monospace;
+            font-size: 24px;
+            text-align: center;
+        }
+
+        .breathing-instruction {
+            margin-top: 40px;
+            font-size: 24px;
+            text-align: center;
+            max-width: 600px;
+            line-height: 1.6;
+        }
+
+        .session-controls {
+            position: absolute;
+            bottom: 50px;
+            display: flex;
+            gap: 20px;
+        }
+
+        .control-btn {
+            padding: 15px 30px;
+            border-radius: 30px;
+            border: 1px solid var(--accent-cyan);
+            background: transparent;
+            color: var(--accent-cyan);
+            font-family: 'Orbitron', monospace;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+
+        .control-btn:hover {
+            background: var(--accent-cyan);
+            color: var(--primary);
+            box-shadow: 0 0 30px rgba(0, 212, 255, 0.5);
+        }
+
+        /* Voice Interface */
+        .voice-indicator {
+            position: fixed;
+            bottom: 100px;
+            right: 30px;
+            width: 60px;
+            height: 60px;
+            border-radius: 50%;
+            background: linear-gradient(135deg, var(--accent-cyan), var(--accent-purple));
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            box-shadow: 0 5px 30px rgba(0, 212, 255, 0.4);
+            transition: all 0.3s ease;
+            z-index: 100;
+           
+        }
+        .voice-select {
+            color: black;
+            background-color: black;
+            
+
+        }
+
+        .voice-indicator:hover {
+            transform: scale(1.1);
+            box-shadow: 0 5px 40px rgba(195, 0, 255, 0.6);
+        }
+
+        .voice-indicator.listening {
+            animation: voicePulse 1.5s infinite;
+        }
+
+        @keyframes voicePulse {
+            0%, 100% { box-shadow: 0 0 0 0 rgba(0, 212, 255, 0.7); }
+            50% { box-shadow: 0 0 0 20px rgba(0, 212, 255, 0); }
+        }
+
+        .voice-waves {
+            position: absolute;
+            width: 100%;
+            height: 100%;
+            border-radius: 50%;
+            border: 2px solid var(--accent-cyan);
+            animation: waveExpand 2s infinite;
+
+        }
+
+        @keyframes waveExpand {
+            0% { transform: scale(1); opacity: 1; }
+            100% { transform: scale(1.5); opacity: 0; }
+        }
+
+        /* Footer */
+        .footer {
+            grid-column: 1 / -1;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 0 30px;
+            background: var(--glass-bg);
+            backdrop-filter: blur(10px);
+            border: 1px solid var(--glass-border);
+            border-radius: 20px;
+            font-family: 'Source Code Pro', monospace;
+            font-size: 13px;
+        }
+
+        .status-indicator {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .status-dot {
+            width: 8px;
+            height: 8px;
+            border-radius: 50%;
+            background: var(--accent-green);
+            box-shadow: 0 0 10px var(--accent-green);
+            animation: statusPulse 2s infinite;
+        }
+
+        @keyframes statusPulse {
+            0%, 100% { opacity: 1; }
+            50% { opacity: 0.5; }
+        }
+
+        .session-timer {
+            color: var(--accent-cyan);
+            font-weight: 600;
+        }
+
+        /* Progress Charts */
+        .chart-container {
+            background: rgba(26, 31, 56, 0.6);
+            border-radius: 16px;
+            padding: 20px;
+            margin-top: 20px;
+            border: 1px solid var(--glass-border);
+        }
+
+        /* Emergency Modal */
+        .emergency-modal {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(255, 107, 107, 0.1);
+            backdrop-filter: blur(10px);
+            z-index: 2000;
+            display: none;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .emergency-modal.active {
+            display: flex;
+            animation: emergencyFlash 0.5s ease;
+        }
+
+        @keyframes emergencyFlash {
+            0%, 100% { background: rgba(255, 107, 107, 0.1); }
+            50% { background: rgba(255, 107, 107, 0.3); }
+        }
+
+        .emergency-content {
+            background: var(--primary);
+            border: 2px solid var(--accent-coral);
+            border-radius: 24px;
+            padding: 40px;
+            max-width: 600px;
+            text-align: center;
+            box-shadow: 0 0 60px rgba(255, 107, 107, 0.5);
+        }
+
+        .emergency-title {
+            font-family: 'Orbitron', monospace;
+            font-size: 32px;
+            color: var(--accent-coral);
+            margin-bottom: 20px;
+        }
+
+        .grounding-technique {
+            background: rgba(255, 255, 255, 0.05);
+            border-radius: 12px;
+            padding: 20px;
+            margin: 15px 0;
+            text-align: left;
+            border-left: 3px solid var(--accent-cyan);
+        }
+
+        /* Scrollbar */
+        ::-webkit-scrollbar {
+            width: 8px;
+        }
+
+        ::-webkit-scrollbar-track {
+            background: rgba(255, 255, 255, 0.05);
+            border-radius: 4px;
+        }
+
+        ::-webkit-scrollbar-thumb {
+            background: var(--accent-cyan);
+            border-radius: 4px;
+        }
+
+        /* Responsive */
+        @media (max-width: 1024px) {
+            .app-container {
+                grid-template-columns: 1fr;
+                grid-template-rows: 70px auto 1fr 60px;
+            }
+            .sidebar {
+                flex-direction: row;
+                overflow-x: auto;
+                padding: 15px;
+            }
+            .nav-item {
+                white-space: nowrap;
+            }
+            .technique-grid {
+                grid-template-columns: 1fr;
+            }
+        }
+
+        /* Breathing Animation States */
+        .breathing-inhale .breathing-circle {
+            animation: inhale 4s ease-in-out;
+        }
+
+        .breathing-hold .breathing-circle {
+            animation: hold 4s ease-in-out;
+        }
+
+        .breathing-exhale .breathing-circle {
+            animation: exhale 6s ease-in-out;
+        }
+
+        @keyframes inhale {
+            0% { transform: scale(1); }
+            100% { transform: scale(1.3); }
+        }
+
+        @keyframes hold {
+            0%, 100% { transform: scale(1.3); }
+        }
+
+        @keyframes exhale {
+            0% { transform: scale(1.3); }
+            100% { transform: scale(1); }
+        }
+
+        /* Journal Input */
+        .journal-input {
+            width: 100%;
+            min-height: 150px;
+            background: rgba(255, 255, 255, 0.05);
+            border: 1px solid var(--glass-border);
+            border-radius: 12px;
+            padding: 15px;
+            color: var(--text-primary);
+            font-family: 'Inter', sans-serif;
+            font-size: 14px;
+            resize: vertical;
+            margin-top: 15px;
+        }
+
+        .journal-input:focus {
+            outline: none;
+            border-color: var(--accent-cyan);
+            box-shadow: 0 0 20px rgba(0, 212, 255, 0.2);
+        }
+
+        /* Affirmation Display */
+        .affirmation-display {
+            background: linear-gradient(135deg, rgba(0, 212, 255, 0.1), rgba(157, 78, 221, 0.1));
+            border: 1px solid var(--accent-cyan);
+            border-radius: 16px;
+            padding: 30px;
+            text-align: center;
+            font-size: 20px;
+            font-style: italic;
+            margin: 20px 0;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .affirmation-display::before,
+        .affirmation-display::after {
+            content: '"';
+            font-size: 60px;
+            color: var(--accent-cyan);
+            opacity: 0.3;
+            position: absolute;
+        }
+
+        .affirmation-display::before {
+            top: -10px;
+            left: 10px;
+        }
+
+        .affirmation-display::after {
+            bottom: -30px;
+            right: 10px;
+        }
+
+        /* Voice Settings */
+        .voice-settings {
+            display: grid;
+            gap: 20px;
+            margin-top: 20px;
+        }
+
+        .setting-item {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 20px;
+            background: rgba(255, 255, 255, 0.05);
+            border-radius: 12px;
+            border: 1px solid var(--glass-border);
+        }
+
+        .setting-label {
+            font-weight: 500;
+        }
+
+        .setting-control {
+            display: flex;
+            align-items: center;
+            gap: 15px;
+        }
+
+        input[type="range"] {
+            width: 150px;
+            height: 6px;
+            background: rgba(255, 255, 255, 0.1);
+            border-radius: 3px;
+            outline: none;
+            --webkit-appearance: none;
+        }
+
+        input[type="range"]::-webkit-slider-thumb {
+            -webkit-appearance: none;
+            width: 18px;
+            height: 18px;
+            background: var(--accent-cyan);
+            border-radius: 50%;
+            cursor: pointer;
+            box-shadow: 0 0 10px rgba(0, 212, 255, 0.5);
+        }
+
+        select {
+            background: rgba(0, 0, 0, 0.938);
+            border: 1px solid var(--glass-border);
+            color: var(--text-primary);
+            padding: 10px 15px;
+            border-radius: 8px;
+            font-family: 'Inter', sans-serif;
+            cursor: pointer;
+        }
+
+        /* Stats Grid */
+        .stats-grid {
+            display: grid;
+            grid-template-columns: repeat(7, 1fr);
+            gap: 10px;
+            margin-top: 20px;
+        }
+
+        .day-bar {
+            height: 100px;
+            background: rgba(255, 255, 255, 0.05);
+            border-radius: 8px;
+            position: relative;
+            overflow: hidden;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: flex-end;
+            padding-bottom: 10px;
+        }
+
+        .day-fill {
+            position: absolute;
+            bottom: 0;
+            left: 0;
+            right: 0;
+            background: linear-gradient(to top, var(--accent-cyan), var(--accent-purple));
+            border-radius: 8px;
+            transition: height 0.5s ease;
+            opacity: 0.7;
+        }
+
+        .day-label {
+            font-size: 12px;
+            color: var(--text-secondary);
+            z-index: 1;
+        }
+
+        .day-value {
+            font-family: 'Source Code Pro', monospace;
+            font-size: 14px;
+            font-weight: 600;
+            color: var(--text-primary);
+            z-index: 1;
+            margin-bottom: 5px;
+        }
+
+        /* Session History */
+        .session-history-item {
+            background: rgba(255, 255, 255, 0.05);
+            border-radius: 12px;
+            padding: 15px;
+            margin-bottom: 10px;
+            border-left: 3px solid var(--accent-cyan);
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .session-info {
+            flex: 1;
+        }
+
+        .session-type {
+            font-family: 'Orbitron', monospace;
+            font-size: 12px;
+            color: var(--accent-cyan);
+            text-transform: uppercase;
+            letter-spacing: 1px;
+        }
+
+        .session-date {
+            font-size: 12px;
+            color: var(--text-secondary);
+        }
+
+        .session-duration {
+            font-family: 'Source Code Pro', monospace;
+            color: var(--accent-green);
+        }
+
+        /* Loading Animation */
+        .loading {
+            display: inline-block;
+            width: 20px;
+            height: 20px;
+            border: 3px solid rgba(0, 212, 255, 0.3);
+            border-radius: 50%;
+            border-top-color: var(--accent-cyan);
+            animation: spin 1s ease-in-out infinite;
+        }
+
+        @keyframes spin {
+            to { transform: rotate(360deg); }
+        }
+
+        /* Notification */
+        .notification {
+            position: fixed;
+            bottom: 150px;
+            right: 30px;
+            background: var(--glass-bg);
+            border: 1px solid var(--accent-green);
+            border-radius: 12px;
+            padding: 15px 20px;
+            color: var(--accent-green);
+            font-family: 'Source Code Pro', monospace;
+            z-index: 1000;
+            animation: slideIn 0.3s ease, slideOut 0.3s ease 2.7s;
+            max-width: 300px;
+        }
+
+        @keyframes slideIn {
+            from { transform: translateX(100%); opacity: 0; }
+            to { transform: translateX(0); opacity: 1; }
+        }
+
+        @keyframes slideOut {
+            from { transform: translateX(0); opacity: 1; }
+            to { transform: translateX(100%); opacity: 0; }
+        }
+
+        /* Heart Rate Variability Display */
+        .hrv-display {
+            width: 100%;
+            height: 120px;
+            position: relative;
+            margin-top: 20px;
+        }
+
+        .hrv-line {
+            fill: none;
+            stroke: var(--accent-cyan);
+            stroke-width: 2;
+            filter: drop-shadow(0 0 10px rgba(0, 212, 255, 0.5));
+        }
+
+        /* Breath Animation Indicator */
+        .breath-phase {
+            position: absolute;
+            top: 20px;
+            left: 50%;
+            transform: translateX(-50%);
+            font-family: 'Orbitron', monospace;
+            font-size: 18px;
+            color: var(--accent-cyan);
+            text-transform: uppercase;
+            letter-spacing: 2px;
+        }
+    </style>
+</head>
+<body>
+    <div class="bg-animation"></div>
+    <div class="grid-overlay"></div>
+
+    <div class="app-container">
+        <!-- Header -->
+        <header class="header">
+            <div class="logo">
+                <div class="logo-icon">🧠</div>
+                <div class="logo-text">NEUROZEN</div>
+            </div>
+            <div class="header-controls">
+                <button class="icon-btn" onclick="app.toggleVoice()" title="Voice Assistant">🎙️</button>
+                <button class="icon-btn" onclick="app.exportData()" title="Export Data">💾</button>
+                <button class="icon-btn" onclick="app.showSettings()" title="Settings">⚙️</button>
+                <button class="emergency-btn" onclick="app.triggerEmergency()">🚨 EMERGENCY</button>
+            </div>
+        </header>
+
+        <!-- Sidebar -->
+        <nav class="sidebar">
+            <div class="nav-item active" onclick="app.navigate('dashboard')">
+                <span class="nav-icon">📊</span>
+                <span class="nav-text">Dashboard</span>
+            </div>
+            <div class="nav-item" onclick="app.navigate('breathing')">
+                <span class="nav-icon">🫁</span>
+                <span class="nav-text">Breathing</span>
+            </div>
+            <div class="nav-item" onclick="app.navigate('mindfulness')">
+                <span class="nav-icon">🧘</span>
+                <span class="nav-text">Mindfulness</span>
+            </div>
+            <div class="nav-item" onclick="app.navigate('cbt')">
+                <span class="nav-icon">💭</span>
+                <span class="nav-text">CBT Tools</span>
+            </div>
+            <div class="nav-item" onclick="app.navigate('grounding')">
+                <span class="nav-icon">🌿</span>
+                <span class="nav-text">Grounding</span>
+            </div>
+            <div class="nav-item" onclick="app.navigate('progress')">
+                <span class="nav-icon">📈</span>
+                <span class="nav-text">Progress</span>
+            </div>
+            <div class="nav-item" onclick="app.navigate('voice')">
+                <span class="nav-icon">🔊</span>
+                <span class="nav-text">Voice Settings</span>
+            </div>
+        </nav>
+
+        <!-- Main Content -->
+        <main class="main-content">
+            <div id="canvas-container"></div>
+            
+            <div class="content-area overlay-ui" id="content-area">
+                <!-- Dashboard Section -->
+                <section id="dashboard" class="therapy-section active">
+                    <h2 class="section-title">Neural Dashboard</h2>
+                    <div class="dashboard-grid">
+                        <div class="neuro-card">
+                            <div class="card-header">
+                                <span class="card-title">Stress Level</span>
+                                <span style="font-size: 24px;">📉</span>
+                            </div>
+                            <div class="card-value" id="stress-value">4/10</div>
+                            <div class="stress-meter">
+                                <div class="stress-bar">
+                                    <div class="stress-fill stress-low" id="stress-bar" style="width: 40%"></div>
+                                </div>
+                            </div>
+                            <div class="card-subtitle">Moderate - Breathing recommended</div>
+                            <button class="control-btn" onclick="app.updateStressLevel(-1)" style="margin-top: 15px; padding: 8px 16px; font-size: 12px;">Better</button>
+                            <button class="control-btn" onclick="app.updateStressLevel(1)" style="margin-top: 15px; margin-left: 10px; padding: 8px 16px; font-size: 12px;">Worse</button>
+                        </div>
+
+                        <div class="neuro-card">
+                            <div class="card-header">
+                                <span class="card-title">Session Streak</span>
+                                <span style="font-size: 24px;">🔥</span>
+                            </div>
+                            <div class="card-value" id="streak-value">12 Days</div>
+                            <div class="card-subtitle">Keep it up! You're building resilience</div>
+                            <div class="progress-ring" style="margin-top: 15px;">
+                                <canvas id="streak-chart" width="100" height="100"></canvas>
+                            </div>
+                        </div>
+
+                        <div class="neuro-card">
+                            <div class="card-header">
+                                <span class="card-title">Mind Minutes</span>
+                                <span style="font-size: 24px;">⏱️</span>
+                            </div>
+                            <div class="card-value" id="minutes-value">284</div>
+                            <div class="card-subtitle">Total meditation time this month</div>
+                            <div class="hrv-display">
+                                <canvas id="hrv-chart"></canvas>
+                            </div>
+                        </div>
+
+                        <div class="neuro-card">
+                            <div class="card-header">
+                                <span class="card-title">Neural Sync</span>
+                                <span style="font-size: 24px;">⚡</span>
+                            </div>
+                            <div class="card-value" id="sync-value">87%</div>
+                            <div class="card-subtitle">Brain coherence with therapy protocols</div>
+                            <div class="progress-ring" style="margin-top: 15px;">
+                                <canvas id="sync-chart" width="100" height="100"></canvas>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="neuro-card" style="margin-top: 20px;">
+                        <div class="card-header">
+                            <span class="card-title">Quick Therapy Access</span>
+                        </div>
+                        <div class="technique-grid" style="margin-top: 20px;">
+                            <div class="technique-card" onclick="app.startSession('breathing', '478')">
+                                <div class="technique-icon">🌬️</div>
+                                <div class="technique-name">4-7-8 Breathing</div>
+                                <div class="technique-desc">Quick anxiety relief technique</div>
+                                <span class="technique-duration">2 min</span>
+                            </div>
+                            <div class="technique-card" onclick="app.startSession('mindfulness', 'bodyscan')">
+                                <div class="technique-icon">🧘</div>
+                                <div class="technique-name">Body Scan</div>
+                                <div class="technique-desc">Release tension systematically</div>
+                                <span class="technique-duration">5 min</span>
+                            </div>
+                            <div class="technique-card" onclick="app.generateAffirmation()">
+                                <div class="technique-icon">✨</div>
+                                <div class="technique-name">Daily Affirmation</div>
+                                <div class="technique-desc">Positive reinforcement generator</div>
+                                <span class="technique-duration">Instant</span>
+                            </div>
+                            <div class="technique-card" onclick="app.showNotification('Daily check-in completed. Great work!', 'success')">
+                                <div class="technique-icon">✅</div>
+                                <div class="technique-name">Daily Check-in</div>
+                                <div class="technique-desc">Track your mental wellness</div>
+                                <span class="technique-duration">1 min</span>
+                            </div>
+                        </div>
+                    </div>
+                </section>
+
+                <!-- Breathing Section -->
+                <section id="breathing" class="therapy-section">
+                    <h2 class="section-title">Breathing Techniques</h2>
+                    <div class="technique-grid">
+                        <div class="technique-card" onclick="app.startSession('breathing', '478')">
+                            <div class="technique-icon">🌬️</div>
+                            <div class="technique-name">4-7-8 Breathing</div>
+                            <div class="technique-desc">Inhale for 4, hold for 7, exhale for 8. Perfect for anxiety and sleep.</div>
+                            <span class="technique-duration">3-5 cycles</span>
+                        </div>
+                        <div class="technique-card" onclick="app.startSession('breathing', 'box')">
+                            <div class="technique-icon">📦</div>
+                            <div class="technique-name">Box Breathing</div>
+                            <div class="technique-desc">Equal duration inhale, hold, exhale, hold. Used by Navy SEALs for focus.</div>
+                            <span class="technique-duration">5 min</span>
+                        </div>
+                        <div class="technique-card" onclick="app.startSession('breathing', 'coherent')">
+                            <div class="technique-icon">💓</div>
+                            <div class="technique-name">Coherent Breathing</div>
+                            <div class="technique-desc">5 breaths per minute to synchronize heart rate variability.</div>
+                            <span class="technique-duration">10 min</span>
+                        </div>
+                        <div class="technique-card" onclick="app.startSession('breathing', 'diaphragmatic')">
+                            <div class="technique-icon">🫁</div>
+                            <div class="technique-name">Diaphragmatic</div>
+                            <div class="technique-desc">Deep belly breathing to activate the parasympathetic nervous system.</div>
+                            <span class="technique-duration">5 min</span>
+                        </div>
+                    </div>
+                </section>
+
+                <!-- Mindfulness Section -->
+                <section id="mindfulness" class="therapy-section">
+                    <h2 class="section-title">Mindfulness & Meditation</h2>
+                    <div class="technique-grid">
+                        <div class="technique-card" onclick="app.startSession('mindfulness', 'bodyscan')">
+                            <div class="technique-icon">🧘</div>
+                            <div class="technique-name">Body Scan Meditation</div>
+                            <div class="technique-desc">Systematically scan and release tension from head to toe.</div>
+                            <span class="technique-duration">10 min</span>
+                        </div>
+                        <div class="technique-card" onclick="app.startSession('mindfulness', 'pmr')">
+                            <div class="technique-icon">💪</div>
+                            <div class="technique-name">Progressive Muscle Relaxation</div>
+                            <div class="technique-desc">Tense and release muscle groups for deep physical relaxation.</div>
+                            <span class="technique-duration">15 min</span>
+                        </div>
+                        <div class="technique-card" onclick="app.startSession('mindfulness', 'visualization')">
+                            <div class="technique-icon">🏖️</div>
+                            <div class="technique-name">Safe Place Visualization</div>
+                            <div class="technique-desc">Create and visit your mental sanctuary for instant calm.</div>
+                            <span class="technique-duration">8 min</span>
+                        </div>
+                        <div class="technique-card" onclick="app.startSession('mindfulness', 'mantra')">
+                            <div class="technique-icon">🕉️</div>
+                            <div class="technique-name">Mantra Meditation</div>
+                            <div class="technique-desc">Silent repetition of calming words or phrases.</div>
+                            <span class="technique-duration">10 min</span>
+                        </div>
+                    </div>
+                </section>
+
+                <!-- CBT Section -->
+                <section id="cbt" class="therapy-section">
+                    <h2 class="section-title">Cognitive Behavioral Tools</h2>
+                    <div class="technique-grid">
+                        <div class="technique-card" onclick="app.startSession('cbt', 'thought-challenge')">
+                            <div class="technique-icon">🔄</div>
+                            <div class="technique-name">Thought Challenging</div>
+                            <div class="technique-desc">Identify and reframe negative thought patterns.</div>
+                            <span class="technique-duration">10 min</span>
+                        </div>
+                        <div class="technique-card" onclick="app.startSession('cbt', 'worry-time')">
+                            <div class="technique-icon">⏰</div>
+                            <div class="technique-name">Worry Time Allocation</div>
+                            <div class="technique-desc">Schedule specific time for worries to contain anxiety.</div>
+                            <span class="technique-duration">15 min</span>
+                        </div>
+                        <div class="technique-card" onclick="app.startSession('cbt', 'gratitude')">
+                            <div class="technique-icon">🙏</div>
+                            <div class="technique-name">Gratitude Journal</div>
+                            <div class="technique-desc">Write three things you're grateful for today.</div>
+                            <span class="technique-duration">5 min</span>
+                        </div>
+                        <div class="technique-card" onclick="app.generateAffirmation()">
+                            <div class="technique-icon">💫</div>
+                            <div class="technique-name">Affirmation Generator</div>
+                            <div class="technique-desc">AI-generated positive affirmations for your current state.</div>
+                            <span class="technique-duration">Instant</span>
+                        </div>
+                    </div>
+                    
+                    <div class="neuro-card" style="margin-top: 30px;">
+                        <div class="card-title">Gratitude Journal</div>
+                        <textarea class="journal-input" id="gratitude-input" placeholder="I am grateful for..."></textarea>
+                        <button class="control-btn" style="margin-top: 15px;" onclick="app.saveGratitude()">Save Entry</button>
+                    </div>
+                </section>
+
+                <!-- Grounding Section -->
+                <section id="grounding" class="therapy-section">
+                    <h2 class="section-title">Sensory Grounding Techniques</h2>
+                    <div class="technique-grid">
+                        <div class="technique-card" onclick="app.startSession('grounding', '54321')">
+                            <div class="technique-icon">👁️</div>
+                            <div class="technique-name">5-4-3-2-1 Technique</div>
+                            <div class="technique-desc">Use your senses: 5 things you see, 4 you hear, 3 you touch, 2 you smell, 1 you taste.</div>
+                            <span class="technique-duration">3 min</span>
+                        </div>
+                        <div class="technique-card" onclick="app.startSession('grounding', 'bilateral')">
+                            <div class="technique-icon">👐</div>
+                            <div class="technique-name">Bilateral Stimulation</div>
+                            <div class="technique-desc">Alternate left-right tapping to reduce emotional intensity.</div>
+                            <span class="technique-duration">5 min</span>
+                        </div>
+                        <div class="technique-card" onclick="app.startSession('grounding', 'temperature')">
+                            <div class="technique-icon">🌡️</div>
+                                <div class="technique-name">Temperature Awareness</div>
+                            <div class="technique-desc">Hold ice or warm water to activate the dive reflex and calm the nervous system.</div>
+                            <span class="technique-duration">2 min</span>
+                        </div>
+                        <div class="technique-card" onclick="app.startSession('grounding', 'categories')">
+                            <div class="technique-icon">📚</div>
+                            <div class="technique-name">Category Game</div>
+                            <div class="technique-desc">Name items in categories (animals, cities) to engage prefrontal cortex.</div>
+                            <span class="technique-duration">5 min</span>
+                        </div>
+                    </div>
+                </section>
+
+                <!-- Progress Section -->
+                <section id="progress" class="therapy-section">
+                    <h2 class="section-title">Neural Progress Tracking</h2>
+                    <div class="dashboard-grid">
+                        <div class="neuro-card">
+                            <div class="card-title">Weekly Activity</div>
+                            <div class="stats-grid" id="weekly-stats">
+                                <!-- Generated by JS -->
+                            </div>
+                        </div>
+                        <div class="neuro-card">
+                            <div class="card-title">Stress Trend</div>
+                            <canvas id="stressChart" width="400" height="200"></canvas>
+                        </div>
+                    </div>
+                    <div class="neuro-card" style="margin-top: 20px;">
+                        <div class="card-title">Session History</div>
+                        <div id="session-history" style="margin-top: 15px;">
+                            <!-- Generated by JS -->
+                        </div>
+                    </div>
+                </section>
+
+                <!-- Voice Settings Section -->
+                <section id="voice" class="therapy-section">
+                    <h2 class="section-title">Voice Configuration</h2>
+                    <div class="neuro-card">
+                        <div class="voice-settings">
+                            <div class="setting-item">
+                                <span class="setting-label">Speech Rate</span>
+                                <div class="setting-control">
+                                    <span style="font-size: 12px; color: var(--text-secondary);">Slow</span>
+                                    <input type="range" min="0.5" max="2" step="0.1" value="1" id="rate-slider" onchange="app.updateVoiceSettings()">
+                                    <span style="font-size: 12px; color: var(--text-secondary);">Fast</span>
+                                </div>
+                            </div>
+                            <div class="setting-item">
+                                <span class="setting-label">Pitch</span>
+                                <div class="setting-control">
+                                    <span style="font-size: 12px; color: var(--text-secondary);">Low</span>
+                                    <input type="range" min="0.5" max="2" step="0.1" value="1" id="pitch-slider" onchange="app.updateVoiceSettings()">
+                                    <span style="font-size: 12px; color: var(--text-secondary);">High</span>
+                                </div>
+                            </div>
+                            <div class="setting-item">
+                                <span class="setting-label">Voice Selection</span>
+                                <select id="voice-select" onchange="app.updateVoiceSettings()">
+                                    <!-- Options will be populated by JS -->
+                                </select>
+                            </div>
+                            <div class="setting-item">
+                                <span class="setting-label">Test Voice</span>
+                                <button class="control-btn" onclick="app.testVoice()">Speak Test Phrase</button>
+                            </div>
+                        </div>
+                    </div>
+                </section>
+            </div>
+        </main>
+
+        <!-- Footer -->
+        <footer class="footer">
+            <div class="status-indicator">
+                <div class="status-dot"></div>
+                <span>System Online • Neural Interface Active</span>
+            </div>
+            <div class="session-timer" id="session-timer">Session: 00:00</div>
+            <div id="voice-status">Voice: Ready</div>
+        </footer>
+    </div>
+
+    <!-- Session Overlay -->
+    <div class="session-overlay" id="session-overlay">
+        <div class="breath-phase" id="breath-phase">Ready</div>
+        <div class="breathing-circle" id="breathing-circle">
+            <div class="breathing-inner" id="breathing-inner">
+                <div id="breathing-text">Ready</div>
+                <div id="cycle-count" style="margin-top: 10px; font-size: 14px; color: var(--text-secondary);"></div>
+            </div>
+        </div>
+        <div class="breathing-instruction" id="breathing-instruction">Press start to begin your therapy session</div>
+        <div class="session-controls">
+            <button class="control-btn" onclick="app.togglePause()" id="pause-btn">⏯️ Pause</button>
+            <button class="control-btn" onclick="app.endSession()">⏹️ End Session</button>
+        </div>
+    </div>
+
+    <!-- Emergency Modal -->
+    <div class="emergency-modal" id="emergency-modal">
+        <div class="emergency-content">
+            <div class="emergency-title">🆘 EMERGENCY PROTOCOL</div>
+            <p style="margin-bottom: 20px; color: var(--text-secondary);">You are safe. Follow these steps immediately:</p>
+            
+            <div class="grounding-technique">
+                <strong style="color: var(--accent-cyan);">1. ICE TECHNIQUE</strong><br>
+                Hold an ice cube or splash cold water on your face. This activates your mammalian dive reflex and slows your heart rate instantly.
+            </div>
+            
+            <div class="grounding-technique">
+                <strong style="color: var(--accent-cyan);">2. 5-4-3-2-1 GROUNDING</strong><br>
+                <span id="emergency-54321">Name 5 things you see, 4 you hear, 3 you can touch, 2 you smell, 1 you taste.</span>
+            </div>
+            
+            <div class="grounding-technique">
+                <strong style="color: var(--accent-cyan);">3. BILATERAL TAPPING</strong><br>
+                Cross your arms and alternate tapping your shoulders left-right-left-right. Continue for 60 seconds.
+            </div>
+
+            <button class="emergency-btn" onclick="app.closeEmergency()" style="margin-top: 20px;">I'M FEELING CALMER</button>
+            <button class="control-btn" onclick="app.startSession('grounding', '54321')" style="margin-top: 10px;">Start Guided Grounding</button>
+        </div>
+    </div>
+
+    <!-- Voice Indicator -->
+    <div class="voice-indicator" id="voice-indicator" onclick="app.toggleVoice()">
+        <span style="font-size: 24px;">🎙️</span>
+        <div class="voice-waves" id="voice-waves" style="display: none;"></div>
+    </div>
+
+    <script>
+        // Comprehensive Therapy Database
+        const therapyDatabase = {
+            breathing: {
+                '478': {
+                    name: '4-7-8 Breathing',
+                    description: 'Calm anxiety and induce sleep',
+                    steps: [
+                        { text: 'Breathe in quietly through your nose...', duration: 4000, action: 'inhale' },
+                        { text: 'Hold your breath...', duration: 7000, action: 'hold' },
+                        { text: 'Exhale completely through your mouth...', duration: 8000, action: 'exhale' },
+                        { text: 'Pause before next breath...', duration: 2000, action: 'rest' }
+                    ],
+                    cycles: 4,
+                    color: '#00d4ff',
+                    instruction: 'Place the tip of your tongue against the ridge behind your upper teeth. Exhale completely through your mouth.'
+                },
+                'box': {
+                    name: 'Box Breathing',
+                    description: 'Navy SEAL technique for focus',
+                    steps: [
+                        { text: 'Inhale for 4 seconds...', duration: 4000, action: 'inhale' },
+                        { text: 'Hold for 4 seconds...', duration: 4000, action: 'hold' },
+                        { text: 'Exhale for 4 seconds...', duration: 4000, action: 'exhale' },
+                        { text: 'Hold empty for 4 seconds...', duration: 4000, action: 'hold' }
+                    ],
+                    cycles: 6,
+                    color: '#9d4edd',
+                    instruction: 'Imagine tracing a square with your breath. Equal duration for each side.'
+                },
+                'coherent': {
+                    name: 'Coherent Breathing',
+                    description: '5 breaths per minute for HRV',
+                    steps: [
+                        { text: 'Gently inhale for 6 seconds...', duration: 6000, action: 'inhale' },
+                        { text: 'Softly exhale for 6 seconds...', duration: 6000, action: 'exhale' }
+                    ],
+                    cycles: 10,
+                    color: '#00ff88',
+                    instruction: 'Smooth, gentle breathing at 5 breaths per minute to optimize heart rate variability.'
+                },
+                'diaphragmatic': {
+                    name: 'Diaphragmatic Breathing',
+                    description: 'Deep belly breathing',
+                    steps: [
+                        { text: 'Breathe into your belly...', duration: 4000, action: 'inhale' },
+                        { text: 'Pause gently...', duration: 2000, action: 'hold' },
+                        { text: 'Slow exhale...', duration: 6000, action: 'exhale' },
+                        { text: 'Rest...', duration: 2000, action: 'rest' }
+                    ],
+                    cycles: 8,
+                    color: '#ffd700',
+                    instruction: 'Place one hand on your chest, one on your belly. Feel only the belly hand move.'
+                }
+            },
+            mindfulness: {
+                'bodyscan': {
+                    name: 'Body Scan Meditation',
+                    description: 'Systematic relaxation from head to toe',
+                    duration: 600000, // 10 minutes
+                    guidance: [
+                        'Settle into a comfortable position... Let your eyes close gently.',
+                        'Bring attention to the top of your head... Notice any sensations there...',
+                        'Move to your forehead, eyes, cheeks, and jaw... Release any tension...',
+                        'Scan down through your neck and shoulders... Let them soften...',
+                        'Feel your chest and belly rise and fall with each breath...',
+                        'Notice your back, hips, and pelvis... Allow them to be supported...',
+                        'Bring awareness to your legs... Thighs, knees, calves, ankles...',
+                        'Finally, feel your feet... Toes... The contact with the floor...',
+                        'Rest in full body awareness... Breathing naturally...',
+                        'When ready, gently bring movement back to your body...'
+                    ],
+                    color: '#9d4edd',
+                    instruction: 'Systematically move your attention through each part of your body, releasing tension as you go.'
+                },
+                'pmr': {
+                    name: 'Progressive Muscle Relaxation',
+                    description: 'Tense and release technique',
+                    duration: 900000, // 15 minutes
+                    guidance: [
+                        'Starting with your feet... Tense them for 5 seconds...',
+                        'And release... Notice the difference between tension and relaxation...',
+                        'Now tense your calves... Hold...',
+                        'And release... Feel the warmth of relaxation...',
+                        'Tense your thighs... Feel the tension...',
+                        'Release... Let go completely...',
+                        'Continue through your entire body...',
+                        'End with your face and scalp... Tense...',
+                        'And finally release... Feel complete relaxation...'
+                    ],
+                    color: '#00d4ff'
+                },
+                'visualization': {
+                    name: 'Safe Place Visualization',
+                    description: 'Create your mental sanctuary',
+                    duration: 480000, // 8 minutes
+                    guidance: [
+                        'Imagine a place where you feel completely safe and at peace...',
+                        'Notice what you see in this place... Colors, shapes, details...',
+                        'What sounds can you hear? Birds, water, silence...',
+                        'Feel the temperature on your skin... The texture around you...',
+                        'Notice any smells or tastes in your safe place...',
+                        'Allow yourself to fully experience this sanctuary...',
+                        'Know you can return here whenever you need...',
+                        'When ready, slowly bring your awareness back...'
+                    ],
+                    color: '#ff6b6b'
+                },
+                'mantra': {
+                    name: 'Mantra Meditation',
+                    description: 'Silent word repetition',
+                    duration: 600000, // 10 minutes
+                    guidance: [
+                        'Choose a calming word or phrase... Like "peace" or "I am calm"...',
+                        'Repeat it silently with each breath...',
+                        'When your mind wanders, gently return to your mantra...',
+                        'Let the vibration of the words soothe your nervous system...',
+                        'Allow the mantra to become your anchor...',
+                        'Sink deeper into relaxation with each repetition...',
+                        'Rest in the stillness between thoughts...',
+                        'When ready, slowly release the mantra...'
+                    ],
+                    color: '#ffd700'
+                }
+            },
+            grounding: {
+                '54321': {
+                    name: '5-4-3-2-1 Grounding',
+                    description: 'Sensory awareness technique',
+                    steps: [
+                        { text: 'Look around... Name 5 things you can SEE...', duration: 10000 },
+                        { text: 'Listen carefully... Name 4 things you can HEAR...', duration: 10000 },
+                        { text: 'Notice what you can FEEL... Name 3 things you can TOUCH...', duration: 10000 },
+                        { text: 'Pay attention to smells... Name 2 things you can SMELL...', duration: 8000 },
+                        { text: 'Focus on taste... Name 1 thing you can TASTE...', duration: 8000 }
+                    ],
+                    cycles: 1,
+                    color: '#00ff88',
+                    instruction: 'Engage all your senses to bring yourself into the present moment.'
+                },
+                'bilateral': {
+                    name: 'Bilateral Stimulation',
+                    description: 'Left-right tapping',
+                    duration: 300000, // 5 minutes
+                    guidance: [
+                        'Cross your arms over your chest...',
+                        'Alternate tapping left then right shoulder...',
+                        'Keep a steady, gentle rhythm...',
+                        'This helps integrate both brain hemispheres...',
+                        'Continue for a few minutes...',
+                        'Notice any shifts in how you feel...'
+                    ],
+                    color: '#9d4edd'
+                },
+                'temperature': {
+                    name: 'Temperature Awareness',
+                    description: 'Ice or cold water technique',
+                    duration: 120000, // 2 minutes
+                    guidance: [
+                        'Hold an ice cube or splash cold water on your face...',
+                        'This activates the mammalian dive reflex...',
+                        'Your heart rate will naturally slow down...',
+                        'Focus on the sensation of cold...',
+                        'Breathe through the discomfort...',
+                        'Feel your body calming...'
+                    ],
+                    color: '#00d4ff'
+                },
+                'categories': {
+                    name: 'Category Game',
+                    description: 'Engage prefrontal cortex',
+                    duration: 180000, // 3 minutes
+                    guidance: [
+                        'Choose a category... Like "animals" or "cities"...',
+                        'Name as many items in that category as you can...',
+                        'This engages your logical brain...',
+                        'It interrupts anxious thought patterns...',
+                        'Try different categories...',
+                        'Notice your mind becoming clearer...'
+                    ],
+                    color: '#ff6b6b'
+                }
+            },
+            cbt: {
+                'thought-challenge': {
+                    name: 'Thought Challenging',
+                    description: 'Examine evidence for worries',
+                    duration: 600000, // 10 minutes
+                    guidance: [
+                        'Identify a troubling thought...',
+                        'What evidence supports this thought?',
+                        'What evidence contradicts it?',
+                        'Is there an alternative explanation?',
+                        'What would you tell a friend with this thought?',
+                        'Reframe the thought more realistically...',
+                        'Practice the new perspective...'
+                    ],
+                    color: '#ffd700'
+                },
+                'worry-time': {
+                    name: 'Worry Time',
+                    description: 'Scheduled worry containment',
+                    duration: 900000, // 15 minutes
+                    guidance: [
+                        'Write down all your worries...',
+                        'Set them aside for later...',
+                        'Schedule specific "worry time"...',
+                        'During worry time, focus only on worries...',
+                        'When time is up, let them go...',
+                        'Practice postponing worries until scheduled time...'
+                    ],
+                    color: '#ff6b6b'
+                },
+                'gratitude': {
+                    name: 'Gratitude Practice',
+                    description: 'Positive focus exercise',
+                    duration: 300000, // 5 minutes
+                    guidance: [
+                        'Think of three things you\'re grateful for...',
+                        'They can be big or small...',
+                        'Feel the appreciation in your body...',
+                        'Notice how gratitude shifts your perspective...',
+                        'Make this a daily habit...',
+                        'End with a smile...'
+                    ],
+                    color: '#00ff88'
+                }
+            }
+        };
+
+        // Affirmations Database
+        const affirmations = [
+            "I am safe and in control of my breathing.",
+            "This moment is temporary, and I am resilient.",
+            "I choose peace over worry.",
+            "My mind is clear, and my body is relaxed.",
+            "I have the strength to handle this situation.",
+            "Each breath brings me calm and clarity.",
+            "I am grounded, centered, and at peace.",
+            "My thoughts do not control me; I control them.",
+            "I release tension with every exhale.",
+            "I am capable of finding calm within the chaos.",
+            "I trust my body's ability to heal and relax.",
+            "Peace flows through me with every heartbeat.",
+            "I am stronger than my anxiety.",
+            "This too shall pass, and I will be okay.",
+            "I am present in this moment, and it is enough."
+        ];
+
+        // Enhanced 3D Brain Visualizer
+        class NeuroVisualizer {
+            constructor() {
+                this.scene = null;
+                this.camera = null;
+                this.renderer = null;
+                this.brainGroup = null;
+                this.particles = null;
+                this.neuralPaths = [];
+                this.stressLevel = 5;
+                this.breathingState = 'idle';
+                this.heartbeat = 0;
+                this.init();
+            }
+
+            init() {
+                const container = document.getElementById('canvas-container');
+                
+                // Scene setup
+                this.scene = new THREE.Scene();
+                this.scene.fog = new THREE.FogExp2(0x0a0e17, 0.02);
+                
+                // Camera
+                this.camera = new THREE.PerspectiveCamera(75, container.clientWidth / container.clientHeight, 0.1, 1000);
+                this.camera.position.z = 30;
+                this.camera.position.y = 10;
+                
+                // Renderer
+                this.renderer = new THREE.WebGLRenderer({ 
+                    alpha: true, 
+                    antialias: true,
+                    powerPreference: "high-performance"
+                });
+                this.renderer.setSize(container.clientWidth, container.clientHeight);
+                this.renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
+                this.renderer.shadowMap.enabled = true;
+                this.renderer.shadowMap.type = THREE.PCFSoftShadowMap;
+                container.appendChild(this.renderer.domElement);
+                
+                // Enhanced Lighting
+                const ambientLight = new THREE.AmbientLight(0xffffff, 0.5);
+                this.scene.add(ambientLight);
+                
+                const pointLight1 = new THREE.PointLight(0x00d4ff, 1.5, 100);
+                pointLight1.position.set(25, 25, 25);
+                pointLight1.castShadow = true;
+                this.scene.add(pointLight1);
+                
+                const pointLight2 = new THREE.PointLight(0x9d4edd, 1.2, 100);
+                pointLight2.position.set(-25, -15, 20);
+                this.scene.add(pointLight2);
+                
+                const directionalLight = new THREE.DirectionalLight(0xffffff, 0.8);
+                directionalLight.position.set(10, 30, 20);
+                directionalLight.castShadow = true;
+                this.scene.add(directionalLight);
+                
+                // Create brain structure
+                this.createBrain();
+                this.createNeuralParticles();
+                this.createNeuralPaths();
+                
+                // Handle resize
+                window.addEventListener('resize', () => this.onResize());
+                
+                // Start animation loop
+                this.animate();
+            }
+
+            createBrain() {
+                this.brainGroup = new THREE.Group();
+                
+                // Left hemisphere
+                const leftGeometry = new THREE.SphereGeometry(8, 64, 64);
+                const leftMaterial = new THREE.MeshPhongMaterial({
+                    color: 0x1a1f38,
+                    emissive: 0x00d4ff,
+                    emissiveIntensity: 0.1,
+                    transparent: true,
+                    opacity: 0.8,
+                    wireframe: false,
+                    shininess: 100
+                });
+                
+                const leftHemisphere = new THREE.Mesh(leftGeometry, leftMaterial);
+                leftHemisphere.position.x = -4;
+                this.brainGroup.add(leftHemisphere);
+                
+                // Right hemisphere
+                const rightHemisphere = new THREE.Mesh(leftGeometry.clone(), leftMaterial);
+                rightHemisphere.position.x = 4;
+                this.brainGroup.add(rightHemisphere);
+                
+                // Corpus callosum (connector)
+                const connectorGeometry = new THREE.CylinderGeometry(2, 2, 6, 16);
+                const connectorMaterial = new THREE.MeshPhongMaterial({
+                    color: 0x9d4edd,
+                    emissive: 0x9d4edd,
+                    emissiveIntensity: 0.3
+                });
+                const connector = new THREE.Mesh(connectorGeometry, connectorMaterial);
+                connector.rotation.z = Math.PI / 2;
+                this.brainGroup.add(connector);
+                
+                this.scene.add(this.brainGroup);
+            }
+
+            createNeuralParticles() {
+                const particleCount = 500;
+                const geometry = new THREE.BufferGeometry();
+                const positions = new Float32Array(particleCount * 3);
+                const colors = new Float32Array(particleCount * 3);
+                const sizes = new Float32Array(particleCount);
+                
+                for (let i = 0; i < particleCount; i++) {
+                    const i3 = i * 3;
+                    const theta = Math.random() * Math.PI * 2;
+                    const phi = Math.acos(Math.random() * 2 - 1);
+                    const r = 8 + Math.random() * 15;
+                    
+                    positions[i3] = r * Math.sin(phi) * Math.cos(theta);
+                    positions[i3 + 1] = r * Math.sin(phi) * Math.sin(theta);
+                    positions[i3 + 2] = r * Math.cos(phi);
+                    
+                    // Color based on position
+                    colors[i3] = 0.0 + Math.sin(theta) * 0.3;
+                    colors[i3 + 1] = 0.7 + Math.cos(phi) * 0.3;
+                    colors[i3 + 2] = 1.0;
+                    
+                    sizes[i] = Math.random() * 0.5 + 0.1;
+                }
+                
+                geometry.setAttribute('position', new THREE.BufferAttribute(positions, 3));
+                geometry.setAttribute('color', new THREE.BufferAttribute(colors, 3));
+                geometry.setAttribute('size', new THREE.BufferAttribute(sizes, 1));
+                
+                const material = new THREE.PointsMaterial({
+                    size: 0.3,
+                    vertexColors: true,
+                    transparent: true,
+                    opacity: 0.8,
+                    blending: THREE.AdditiveBlending,
+                    sizeAttenuation: true
+                });
+                
+                this.particles = new THREE.Points(geometry, material);
+                this.scene.add(this.particles);
+            }
+
+            createNeuralPaths() {
+                // Create glowing neural pathway lines
+                for (let i = 0; i < 12; i++) {
+                    const curve = new THREE.CatmullRomCurve3(this.generateNeuralPathPoints());
+                    
+                    const points = curve.getPoints(50);
+                    const geometry = new THREE.BufferGeometry().setFromPoints(points);
+                    
+                    const material = new THREE.LineBasicMaterial({
+                        color: i % 3 === 0 ? 0x00d4ff : i % 3 === 1 ? 0x9d4edd : 0x00ff88,
+                        transparent: true,
+                        opacity: 0.4,
+                        linewidth: 2
+                    });
+                    
+                    const line = new THREE.Line(geometry, material);
+                    this.neuralPaths.push({ line, speed: 0.002 + Math.random() * 0.003 });
+                    this.scene.add(line);
+                }
+            }
+
+            generateNeuralPathPoints() {
+                const points = [];
+                const segments = 8;
+                
+                for (let i = 0; i <= segments; i++) {
+                    const t = i / segments;
+                    const angle = t * Math.PI * 2;
+                    const radius = 10 + Math.sin(t * Math.PI * 2) * 3;
+                    const x = radius * Math.cos(angle) + (Math.random() - 0.5) * 2;
+                    const y = radius * Math.sin(angle) + (Math.random() - 0.5) * 2;
+                    const z = (t - 0.5) * 15 + (Math.random() - 0.5) * 3;
+                    
+                    points.push(new THREE.Vector3(x, y, z));
+                }
+                
+                return points;
+            }
+
+            updateStressLevel(level) {
+                this.stressLevel = level;
+                const intensity = level / 10;
+                
+                // Update brain color based on stress
+                const color = new THREE.Color();
+                if (level < 4) {
+                    color.setHSL(0.5 + intensity * 0.1, 0.8, 0.5);
+                } else if (level < 7) {
+                    color.setHSL(0.1 + intensity * 0.1, 0.8, 0.5);
+                } else {
+                    color.setHSL(0.0, 0.9, 0.5);
+                }
+                
+                // Update brain material
+                this.brainGroup.children.forEach((mesh, i) => {
+                    if (i < 2) { // Hemispheres
+                        mesh.material.emissive = color;
+                        mesh.material.emissiveIntensity = 0.1 + intensity * 0.2;
+                    }
+                });
+                
+                // Update particle animation speed
+                this.particleSpeed = 0.01 + intensity * 0.02;
+            }
+
+            startBreathingVisualization(action) {
+                this.breathingState = action;
+                
+                // Visual feedback for breathing
+                if (action === 'inhale') {
+                    // Expand brain slightly
+                    this.brainGroup.scale.set(1.05, 1.05, 1.05);
+                } else if (action === 'exhale') {
+                    // Return to normal size
+                    this.brainGroup.scale.set(1, 1, 1);
+                }
+            }
+
+            animate() {
+                requestAnimationFrame(() => this.animate());
+                
+                const time = Date.now() * 0.001;
+                this.heartbeat += 0.05;
+                
+                // Rotate brain slowly
+                if (this.brainGroup) {
+                    this.brainGroup.rotation.y += 0.001;
+                    this.brainGroup.rotation.x = Math.sin(time * 0.3) * 0.05;
+                    
+                    // Subtle breathing animation
+                    if (this.breathingState === 'inhale') {
+                        this.brainGroup.scale.lerp(new THREE.Vector3(1.05, 1.05, 1.05), 0.05);
+                    } else if (this.breathingState === 'exhale') {
+                        this.brainGroup.scale.lerp(new THREE.Vector3(0.98, 0.98, 0.98), 0.05);
+                    } else {
+                        this.brainGroup.scale.lerp(new THREE.Vector3(1, 1, 1), 0.05);
+                    }
+                }
+                
+                // Animate particles
+                if (this.particles) {
+                    const positions = this.particles.geometry.attributes.position.array;
+                    const timeOffset = time * 0.5;
+                    
+                    for (let i = 0; i < positions.length; i += 3) {
+                        const index = i / 3;
+                        const speed = 0.02 + (Math.sin(timeOffset + index) * 0.01);
+                        
+                        // Orbital motion
+                        positions[i] += Math.cos(timeOffset + index * 0.1) * speed;
+                        positions[i + 1] += Math.sin(timeOffset + index * 0.1) * speed;
+                        positions[i + 2] += Math.cos(timeOffset + index * 0.05) * speed * 0.5;
+                    }
+                    
+                    this.particles.geometry.attributes.position.needsUpdate = true;
+                    this.particles.rotation.y += 0.0005;
+                }
+                
+                // Animate neural paths
+                this.neuralPaths.forEach((path, i) => {
+                    path.line.material.opacity = 0.3 + Math.sin(time * 2 + i) * 0.2;
+                    path.line.rotation.y += path.speed;
+                });
+                
+                // Camera subtle movement
+                this.camera.position.x = Math.sin(time * 0.2) * 5;
+                this.camera.position.y = 10 + Math.sin(time * 0.3) * 2;
+                this.camera.lookAt(0, 0, 0);
+                
+                this.renderer.render(this.scene, this.camera);
+            }
+
+            onResize() {
+                const container = document.getElementById('canvas-container');
+                this.camera.aspect = container.clientWidth / container.clientHeight;
+                this.camera.updateProjectionMatrix();
+                this.renderer.setSize(container.clientWidth, container.clientHeight);
+            }
+        }
+
+        // Enhanced Voice Engine
+        class VoiceEngine {
+            constructor() {
+                this.synth = window.speechSynthesis;
+                this.recognition = null;
+                this.voices = [];
+                this.settings = {
+                    rate: 1,
+                    pitch: 1,
+                    voice: null,
+                    volume: 1
+                };
+                this.isListening = false;
+                this.init();
+            }
+
+            init() {
+                // Load voices
+                this.loadVoices();
+                if (speechSynthesis.onvoiceschanged !== undefined) {
+                    speechSynthesis.onvoiceschanged = () => this.loadVoices();
+                }
+                
+                // Setup recognition if available
+                if ('webkitSpeechRecognition' in window || 'SpeechRecognition' in window) {
+                    const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
+                    this.recognition = new SpeechRecognition();
+                    this.recognition.continuous = true;
+                    this.recognition.interimResults = true;
+                    this.recognition.lang = 'en-US';
+                    this.recognition.maxAlternatives = 3;
+                }
+            }
+
+            loadVoices() {
+                this.voices = this.synth.getVoices();
+                const select = document.getElementById('voice-select');
+                if (select && this.voices.length > 0) {
+                    select.innerHTML = '';
+                    const defaultVoice = this.voices.find(voice => 
+                        voice.lang === 'en-US' && 
+                        (voice.name.includes('Female') || voice.name.includes('Samantha'))
+                    );
+                    
+                    this.voices.forEach((voice, i) => {
+                        const option = document.createElement('option');
+                        option.value = i;
+                        option.textContent = `${voice.name} (${voice.lang})`;
+                        option.selected = (voice === defaultVoice);
+                        select.appendChild(option);
+                    });
+                    
+                    this.settings.voice = defaultVoice || this.voices[0];
+                }
+            }
+
+            speak(text, emotion = 'calm', onEnd = null) {
+                if (!this.synth) {
+                    console.error('Speech synthesis not available');
+                    return null;
+                }
+                
+                // Cancel current speech
+                this.synth.cancel();
+                
+                const utterance = new SpeechSynthesisUtterance(text);
+                utterance.rate = this.settings.rate;
+                utterance.pitch = this.settings.pitch;
+                utterance.volume = this.settings.volume;
+                
+                // Adjust based on emotion
+                switch(emotion) {
+                    case 'calm':
+                        utterance.rate *= 0.85;
+                        utterance.pitch *= 0.95;
+                        break;
+                    case 'urgent':
+                        utterance.rate *= 1.2;
+                        utterance.pitch *= 1.1;
+                        break;
+                    case 'excited':
+                        utterance.rate *= 1.1;
+                        utterance.pitch *= 1.05;
+                        break;
+                    case 'sleepy':
+                        utterance.rate *= 0.7;
+                        utterance.pitch *= 0.9;
+                        break;
+                }
+                
+                if (this.settings.voice) {
+                    utterance.voice = this.settings.voice;
+                }
+                
+                if (onEnd) {
+                    utterance.onend = onEnd;
+                }
+                
+                utterance.onerror = (event) => {
+                    console.error('Speech synthesis error:', event);
+                };
+                
+                this.synth.speak(utterance);
+                return utterance;
+            }
+
+            listen(callback) {
+                if (!this.recognition) {
+                    this.showNotification('Voice recognition not supported in this browser', 'error');
+                    return;
+                }
+                
+                if (this.isListening) {
+                    this.stopListening();
+                } else {
+                    this.startListening(callback);
+                }
+            }
+
+            startListening(callback) {
+                this.recognition.onresult = (event) => {
+                    let finalTranscript = '';
+                    let interimTranscript = '';
+                    
+                    for (let i = event.resultIndex; i < event.results.length; i++) {
+                        const transcript = event.results[i][0].transcript;
+                        if (event.results[i].isFinal) {
+                            finalTranscript += transcript;
+                        } else {
+                            interimTranscript += transcript;
+                        }
+                    }
+                    
+                    if (finalTranscript) {
+                        callback(finalTranscript.trim());
+                        document.getElementById('voice-status').textContent = `Heard: "${finalTranscript}"`;
+                    }
+                };
+                
+                this.recognition.onerror = (event) => {
+                    console.error('Speech recognition error:', event.error);
+                    if (event.error === 'no-speech') {
+                        this.showNotification('No speech detected. Please try again.', 'error');
+                    }
+                    this.stopListening();
+                };
+                
+                this.recognition.onend = () => {
+                    if (this.isListening) {
+                        // Auto-restart listening
+                        this.recognition.start();
+                    }
+                };
+                
+                this.recognition.start();
+                this.isListening = true;
+                document.getElementById('voice-indicator').classList.add('listening');
+                document.getElementById('voice-waves').style.display = 'block';
+                document.getElementById('voice-status').textContent = 'Voice: Listening...';
+            }
+
+            stopListening() {
+                if (this.recognition) {
+                    this.recognition.stop();
+                }
+                this.isListening = false;
+                document.getElementById('voice-indicator').classList.remove('listening');
+                document.getElementById('voice-waves').style.display = 'none';
+                document.getElementById('voice-status').textContent = 'Voice: Ready';
+            }
+
+            stop() {
+                if (this.synth) this.synth.cancel();
+                if (this.isListening) {
+                    this.stopListening();
+                }
+            }
+
+            updateSettings(rate, pitch, voiceIndex) {
+                this.settings.rate = parseFloat(rate);
+                this.settings.pitch = parseFloat(pitch);
+                if (this.voices[voiceIndex]) {
+                    this.settings.voice = this.voices[voiceIndex];
+                }
+            }
+
+            showNotification(message, type = 'info') {
+                console.log(`Voice Engine: ${message}`);
+            }
+        }
+
+        // Main Application Class
+        class NeuroZenApp {
+            constructor() {
+                this.visualizer = null;
+                this.voice = null;
+                this.currentSession = null;
+                this.sessionStartTime = null;
+                this.sessionTimer = null;
+                this.breathingInterval = null;
+                this.isPaused = false;
+                this.currentCycle = 0;
+                this.currentStep = 0;
+                this.userData = this.loadUserData();
+                this.charts = {};
+                this.init();
+            }
+
+            init() {
+                // Initialize 3D visualizer
+                this.visualizer = new NeuroVisualizer();
+                
+                // Initialize voice engine
+                this.voice = new VoiceEngine();
+                
+                // Setup UI
+                this.setupEventListeners();
+                this.updateDashboard();
+                this.generateWeeklyStats();
+                this.loadSessionHistory();
+                this.initializeCharts();
+                
+                // Start ambient mode
+                this.startAmbientMode();
+                
+                // Welcome message
+                setTimeout(() => {
+                    this.voice.speak("Welcome to NeuroZen. Your neural interface is now active. How are you feeling today?", "calm");
+                }, 1000);
+                
+                // Auto-save every minute
+                setInterval(() => this.saveUserData(), 60000);
+            }
+
+            setupEventListeners() {
+                // Navigation
+                document.querySelectorAll('.nav-item').forEach(item => {
+                    item.addEventListener('click', (e) => {
+                        const section = e.currentTarget.getAttribute('onclick').match(/'([^']+)'/)[1];
+                        this.navigate(section);
+                    });
+                });
+
+                // Keyboard shortcuts
+                document.addEventListener('keydown', (e) => {
+                    if (e.key === 'Escape') {
+                        this.handleEscapeKey();
+                    }
+                    if (e.key === ' ' && document.getElementById('session-overlay').classList.contains('active')) {
+                        e.preventDefault();
+                        this.togglePause();
+                    }
+                    if (e.key === 'm' && (e.ctrlKey || e.metaKey)) {
+                        e.preventDefault();
+                        this.toggleVoice();
+                    }
+                    if (e.key === 'e' && (e.ctrlKey || e.metaKey)) {
+                        e.preventDefault();
+                        this.triggerEmergency();
+                    }
+                });
+
+                // Handle beforeunload
+                window.addEventListener('beforeunload', (e) => {
+                    if (this.currentSession) {
+                        e.preventDefault();
+                        e.returnValue = 'You have an active therapy session. Are you sure you want to leave?';
+                        return e.returnValue;
+                    }
+                });
+            }
+
+            handleEscapeKey() {
+                if (document.getElementById('emergency-modal').classList.contains('active')) {
+                    this.closeEmergency();
+                } else if (document.getElementById('session-overlay').classList.contains('active')) {
+                    this.endSession();
+                }
+            }
+
+            loadUserData() {
+                try {
+                    const saved = localStorage.getItem('neurozen_data');
+                    const defaultData = {
+                        stressLevel: 4,
+                        streak: 12,
+                        totalMinutes: 284,
+                        sessions: [],
+                        gratitudeEntries: [],
+                        lastLogin: new Date().toISOString(),
+                        settings: {
+                            voiceEnabled: true,
+                            notifications: true,
+                            darkMode: true
+                        }
+                    };
+                    
+                    if (saved) {
+                        const parsed = JSON.parse(saved);
+                        // Update streak based on last login
+                        const lastLogin = new Date(parsed.lastLogin || new Date().toISOString());
+                        const today = new Date();
+                        const daysSinceLastLogin = Math.floor((today - lastLogin) / (1000 * 60 * 60 * 24));
+                        
+                        if (daysSinceLastLogin === 1) {
+                            parsed.streak += 1;
+                        } else if (daysSinceLastLogin > 1) {
+                            parsed.streak = 1;
+                        }
+                        
+                        parsed.lastLogin = today.toISOString();
+                        return { ...defaultData, ...parsed };
+                    }
+                    return defaultData;
+                } catch (error) {
+                    console.error('Error loading user data:', error);
+                    return {
+                        stressLevel: 4,
+                        streak: 12,
+                        totalMinutes: 284,
+                        sessions: [],
+                        gratitudeEntries: [],
+                        lastLogin: new Date().toISOString(),
+                        settings: {
+                            voiceEnabled: true,
+                            notifications: true,
+                            darkMode: true
+                        }
+                    };
+                }
+            }
+
+            saveUserData() {
+                try {
+                    localStorage.setItem('neurozen_data', JSON.stringify(this.userData));
+                } catch (error) {
+                    console.error('Error saving user data:', error);
+                }
+            }
+
+            navigate(section) {
+                // Update active navigation
+                document.querySelectorAll('.nav-item').forEach(item => item.classList.remove('active'));
+                document.querySelectorAll('.nav-item').forEach(item => {
+                    if (item.getAttribute('onclick').includes(section)) {
+                        item.classList.add('active');
+                    }
+                });
+                
+                // Hide all sections
+                document.querySelectorAll('.therapy-section').forEach(s => s.classList.remove('active'));
+                
+                // Show target section
+                const targetSection = document.getElementById(section);
+                if (targetSection) {
+                    targetSection.classList.add('active');
+                    
+                    // Special handling for different sections
+                    if (section === 'progress') {
+                        this.updateProgressCharts();
+                    } else if (section === 'voice') {
+                        this.populateVoiceSettings();
+                    }
+                    
+                    // Announce navigation
+                    const sectionNames = {
+                        'dashboard': 'Dashboard',
+                        'breathing': 'Breathing Techniques',
+                        'mindfulness': 'Mindfulness and Meditation',
+                        'cbt': 'Cognitive Behavioral Tools',
+                        'grounding': 'Grounding Techniques',
+                        'progress': 'Progress Tracking',
+                        'voice': 'Voice Settings'
+                    };
+                    
+                    if (this.voice && section !== 'dashboard' && this.userData.settings.voiceEnabled) {
+                        this.voice.speak(`Navigating to ${sectionNames[section]}`, 'calm');
+                    }
+                }
+            }
+
+            updateDashboard() {
+                // Update stress level display
+                document.getElementById('stress-value').textContent = `${this.userData.stressLevel}/10`;
+                
+                // Update stress bar
+                const stressBar = document.getElementById('stress-bar');
+                const stressPercent = (this.userData.stressLevel / 10) * 100;
+                stressBar.style.width = `${stressPercent}%`;
+                
+                // Update stress bar color
+                stressBar.className = 'stress-fill';
+                if (this.userData.stressLevel <= 3) {
+                    stressBar.classList.add('stress-low');
+                } else if (this.userData.stressLevel <= 6) {
+                    stressBar.classList.add('stress-med');
+                } else {
+                    stressBar.classList.add('stress-high');
+                }
+                
+                // Update other metrics
+                document.getElementById('streak-value').textContent = `${this.userData.streak} Days`;
+                document.getElementById('minutes-value').textContent = this.userData.totalMinutes;
+                document.getElementById('sync-value').textContent = `${this.calculateNeuralSync()}%`;
+                
+                // Update 3D visualizer
+                if (this.visualizer) {
+                    this.visualizer.updateStressLevel(this.userData.stressLevel);
+                }
+            }
+
+            calculateNeuralSync() {
+                // Calculate based on recent activity and consistency
+                const recentSessions = this.userData.sessions.slice(-7);
+                if (recentSessions.length === 0) return 50;
+                
+                const consistency = Math.min(100, (recentSessions.length / 7) * 100);
+                const averageDuration = recentSessions.reduce((sum, s) => sum + s.duration, 0) / recentSessions.length;
+                const durationScore = Math.min(100, (averageDuration / 10) * 100);
+                
+                return Math.round((consistency + durationScore) / 2);
+            }
+
+            startSession(type, techniqueId) {
+                const technique = therapyDatabase[type][techniqueId];
+                if (!technique) {
+                    this.showNotification('Technique not found', 'error');
+                    return;
+                }
+                
+                // Stop any existing session
+                if (this.currentSession) {
+                    this.endSession();
+                }
+                
+                this.currentSession = {
+                    type,
+                    techniqueId,
+                    technique,
+                    startTime: Date.now(),
+                    currentStep: 0,
+                    cycle: 0,
+                    isBreathing: !!technique.steps
+                };
+                
+                // Show session overlay
+                const overlay = document.getElementById('session-overlay');
+                overlay.classList.add('active');
+                
+                // Reset overlay classes
+                overlay.className = 'session-overlay active';
+                
+                // Update UI
+                document.getElementById('breath-phase').textContent = 'Ready';
+                document.getElementById('breathing-text').textContent = technique.name;
+                document.getElementById('breathing-instruction').textContent = technique.instruction || 'Begin when ready';
+                document.getElementById('cycle-count').textContent = '';
+                
+                // Start voice guidance
+                if (this.userData.settings.voiceEnabled) {
+                    this.voice.speak(`Beginning ${technique.name}. ${technique.description}`, 'calm');
+                }
+                
+                // Start timer
+                this.sessionStartTime = Date.now();
+                this.startSessionTimer();
+                
+                // Start the technique after a brief delay
+                setTimeout(() => {
+                    if (technique.steps) {
+                        this.runBreathingTechnique();
+                    } else if (technique.guidance) {
+                        this.runGuidanceTechnique();
+                    }
+                }, 3000);
+            }
+
+            runBreathingTechnique() {
+                if (!this.currentSession || this.isPaused) return;
+                
+                const { technique, currentStep, cycle } = this.currentSession;
+                
+                if (cycle >= technique.cycles) {
+                    this.completeSession();
+                    return;
+                }
+                
+                const step = technique.steps[currentStep];
+                
+                // Update UI
+                document.getElementById('breath-phase').textContent = step.action.toUpperCase();
+                document.getElementById('breathing-text').textContent = step.action === 'inhale' ? 'INHALE' : 
+                                                                       step.action === 'hold' ? 'HOLD' : 
+                                                                       step.action === 'exhale' ? 'EXHALE' : 'REST';
+                document.getElementById('breathing-instruction').textContent = step.text;
+                document.getElementById('cycle-count').textContent = `Cycle ${cycle + 1} of ${technique.cycles}`;
+                
+                // Update overlay class for animation
+                const overlay = document.getElementById('session-overlay');
+                overlay.classList.remove('breathing-inhale', 'breathing-hold', 'breathing-exhale');
+                if (step.action === 'inhale') overlay.classList.add('breathing-inhale');
+                else if (step.action === 'hold') overlay.classList.add('breathing-hold');
+                else if (step.action === 'exhale') overlay.classList.add('breathing-exhale');
+                
+                // Update 3D visualization
+                this.visualizer.startBreathingVisualization(step.action);
+                
+                // Speak instruction
+                if (this.userData.settings.voiceEnabled) {
+                    this.voice.speak(step.text, 'calm');
+                }
+                
+                // Schedule next step
+                this.breathingInterval = setTimeout(() => {
+                    if (!this.isPaused && this.currentSession) {
+                        this.currentSession.currentStep++;
+                        if (this.currentSession.currentStep >= technique.steps.length) {
+                            this.currentSession.currentStep = 0;
+                            this.currentSession.cycle++;
+                        }
+                        this.runBreathingTechnique();
+                    }
+                }, step.duration);
+            }
+
+            runGuidanceTechnique() {
+                if (!this.currentSession || this.isPaused) return;
+                
+                const { technique, startTime } = this.currentSession;
+                const elapsed = Date.now() - startTime;
+                const stepDuration = technique.duration / technique.guidance.length;
+                const currentStep = Math.floor(elapsed / stepDuration);
+                
+                if (currentStep >= technique.guidance.length) {
+                    this.completeSession();
+                    return;
+                }
+                
+                // Update instruction
+                document.getElementById('breathing-instruction').textContent = technique.guidance[currentStep];
+                
+                // Speak guidance periodically
+                if (elapsed % 30000 < 1000 && this.userData.settings.voiceEnabled) {
+                    this.voice.speak(technique.guidance[currentStep], 'calm');
+                }
+                
+                // Continue checking
+                setTimeout(() => this.runGuidanceTechnique(), 1000);
+            }
+
+            togglePause() {
+                this.isPaused = !this.isPaused;
+                const pauseBtn = document.getElementById('pause-btn');
+                
+                if (this.isPaused) {
+                    pauseBtn.innerHTML = '⏯️ Resume';
+                    if (this.breathingInterval) {
+                        clearTimeout(this.breathingInterval);
+                    }
+                    if (this.userData.settings.voiceEnabled) {
+                        this.voice.speak("Session paused", 'calm');
+                    }
+                } else {
+                    pauseBtn.innerHTML = '⏯️ Pause';
+                    if (this.currentSession?.isBreathing) {
+                        this.runBreathingTechnique();
+                    } else {
+                        this.runGuidanceTechnique();
+                    }
+                    if (this.userData.settings.voiceEnabled) {
+                        this.voice.speak("Session resumed", 'calm');
+                    }
+                }
+            }
+
+            endSession() {
+                if (!this.currentSession) return;
+                
+                const duration = Math.floor((Date.now() - this.currentSession.startTime) / 60000);
+                
+                // Save session data
+                this.userData.totalMinutes += duration;
+                this.userData.sessions.push({
+                    id: Date.now(),
+                    date: new Date().toISOString(),
+                    type: this.currentSession.type,
+                    technique: this.currentSession.technique.name,
+                    duration,
+                    stressBefore: this.userData.stressLevel,
+                    stressAfter: Math.max(1, this.userData.stressLevel - 2)
+                });
+                
+                // Update streak if this is first session today
+                const today = new Date().toDateString();
+                const lastSession = this.userData.sessions[this.userData.sessions.length - 2];
+                if (!lastSession || new Date(lastSession.date).toDateString() !== today) {
+                    this.userData.streak++;
+                }
+                
+                this.saveUserData();
+                this.closeSession();
+                
+                // Show completion message
+                this.showNotification(`Session completed! ${duration} minutes logged.`, 'success');
+                if (this.userData.settings.voiceEnabled) {
+                    this.voice.speak(`Session completed. Great work! You practiced for ${duration} minutes.`, 'excited');
+                }
+            }
+
+            completeSession() {
+                if (this.userData.settings.voiceEnabled) {
+                    this.voice.speak("Session complete. You did great. Take a moment to notice how you feel.", 'calm');
+                }
+                
+                setTimeout(() => {
+                    this.endSession();
+                }, 3000);
+            }
+
+            closeSession() {
+                // Clear intervals
+                if (this.breathingInterval) {
+                    clearTimeout(this.breathingInterval);
+                }
+                if (this.sessionTimer) {
+                    clearInterval(this.sessionTimer);
+                }
+                
+                // Reset UI
+                document.getElementById('session-overlay').classList.remove('active');
+                document.getElementById('session-timer').textContent = 'Session: 00:00';
+                
+                // Reset state
+                this.currentSession = null;
+                this.isPaused = false;
+                this.currentCycle = 0;
+                this.currentStep = 0;
+                
+                // Update dashboard
+                this.updateDashboard();
+                this.loadSessionHistory();
+                
+                // Reset visualizer
+                this.visualizer.startBreathingVisualization('idle');
+            }
+
+            startSessionTimer() {
+                this.sessionTimer = setInterval(() => {
+                    if (this.currentSession && !this.isPaused) {
+                        const elapsed = Math.floor((Date.now() - this.sessionStartTime) / 1000);
+                        const mins = Math.floor(elapsed / 60).toString().padStart(2, '0');
+                        const secs = (elapsed % 60).toString().padStart(2, '0');
+                        document.getElementById('session-timer').textContent = `Session: ${mins}:${secs}`;
+                    }
+                }, 1000);
+            }
+
+            updateStressLevel(change) {
+                const newLevel = Math.max(1, Math.min(10, this.userData.stressLevel + change));
+                this.userData.stressLevel = newLevel;
+                this.updateDashboard();
+                this.saveUserData();
+                
+                // Provide feedback
+                if (change < 0) {
+                    this.showNotification('Stress level decreased. Great job!', 'success');
+                    if (this.userData.settings.voiceEnabled) {
+                        this.voice.speak("I notice you're feeling better. That's wonderful!", 'excited');
+                    }
+                } else {
+                    this.showNotification('Stress level increased. Try a breathing exercise.', 'warning');
+                    if (this.userData.stressLevel >= 7 && this.userData.settings.voiceEnabled) {
+                        this.voice.speak("I notice you're feeling stressed. Would you like to try a breathing exercise?", 'calm');
+                    }
+                }
+            }
+
+            generateAffirmation() {
+                const affirmation = affirmations[Math.floor(Math.random() * affirmations.length)];
+                
+                // Create or update affirmation display
+                let display = document.querySelector('.affirmation-display');
+                if (!display) {
+                    display = document.createElement('div');
+                    display.className = 'affirmation-display';
+                    document.getElementById('dashboard').appendChild(display);
+                }
+                
+                display.textContent = affirmation;
+                display.style.animation = 'none';
+                void display.offsetWidth;
+                display.style.animation = 'fadeIn 0.5s ease';
+                
+                if (this.userData.settings.voiceEnabled) {
+                    this.voice.speak(affirmation, 'calm');
+                }
+                
+                // Auto-remove after 15 seconds
+                setTimeout(() => {
+                    if (display.parentNode) {
+                        display.style.opacity = '0';
+                        setTimeout(() => {
+                            if (display.parentNode) {
+                                display.remove();
+                            }
+                        }, 500);
+                    }
+                }, 15000);
+                
+                this.showNotification('New affirmation generated', 'success');
+            }
+
+            saveGratitude() {
+                const input = document.getElementById('gratitude-input');
+                const text = input.value.trim();
+                
+                if (!text) {
+                    this.showNotification('Please enter something you are grateful for', 'error');
+                    return;
+                }
+                
+                this.userData.gratitudeEntries.push({
+                    date: new Date().toISOString(),
+                    text
+                });
+                this.saveUserData();
+                
+                input.value = '';
+                
+                // Show confirmation
+                this.showNotification('Gratitude entry saved!', 'success');
+                
+                if (this.userData.settings.voiceEnabled) {
+                    this.voice.speak("Gratitude entry saved. Acknowledging the good in your life builds neural pathways of positivity.", 'calm');
+                }
+                
+                // Update stress level positively
+                this.updateStressLevel(-1);
+            }
+
+            generateWeeklyStats() {
+                const container = document.getElementById('weekly-stats');
+                const days = ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun'];
+                const today = new Date().getDay();
+                const adjustedToday = today === 0 ? 6 : today - 1; // Adjust for Monday start
+                
+                // Generate sample data for the week
+                const data = Array(7).fill(0);
+                this.userData.sessions.forEach(session => {
+                    const date = new Date(session.date);
+                    const dayOfWeek = date.getDay();
+                    const adjustedDay = dayOfWeek === 0 ? 6 : dayOfWeek - 1;
+                    const daysAgo = (adjustedToday - adjustedDay + 7) % 7;
+                    if (daysAgo < 7) {
+                        data[adjustedDay] += session.duration;
+                    }
+                });
+                
+                // Fill missing days with random data for demo
+                data.forEach((val, i) => {
+                    if (val === 0 && i <= adjustedToday) {
+                        data[i] = Math.floor(Math.random() * 60) + 10;
+                    }
+                });
+                
+                // Clear and rebuild
+                container.innerHTML = '';
+                const maxVal = Math.max(...data, 60);
+                
+                days.forEach((day, i) => {
+                    const bar = document.createElement('div');
+                    bar.className = 'day-bar';
+                    const height = (data[i] / maxVal) * 100;
+                    bar.innerHTML = `
+                        <div class="day-value">${data[i]}</div>
+                        <div class="day-fill" style="height: ${height}%"></div>
+                        <div class="day-label">${day}</div>
+                    `;
+                    
+                    // Highlight today
+                    if (i === adjustedToday) {
+                        bar.style.border = '2px solid var(--accent-cyan)';
+                    }
+                    
+                    container.appendChild(bar);
+                });
+            }
+
+            loadSessionHistory() {
+                const container = document.getElementById('session-history');
+                if (!container) return;
+                
+                // Get recent sessions
+                const recentSessions = [...this.userData.sessions]
+                    .sort((a, b) => new Date(b.date) - new Date(a.date))
+                    .slice(0, 10);
+                
+                if (recentSessions.length === 0) {
+                    container.innerHTML = '<p style="color: var(--text-secondary); text-align: center; padding: 20px;">No sessions yet. Start your first session!</p>';
+                    return;
+                }
+                
+                container.innerHTML = '';
+                
+                recentSessions.forEach(session => {
+                    const item = document.createElement('div');
+                    item.className = 'session-history-item';
+                    
+                    const date = new Date(session.date);
+                    const dateStr = date.toLocaleDateString('en-US', { 
+                        month: 'short', 
+                        day: 'numeric',
+                        hour: '2-digit',
+                        minute: '2-digit'
+                    });
+                    
+                    const typeIcons = {
+                        'breathing': '🌬️',
+                        'mindfulness': '🧘',
+                        'cbt': '💭',
+                        'grounding': '🌿'
+                    };
+                    
+                    item.innerHTML = `
+                        <div class="session-info">
+                            <div class="session-type">${typeIcons[session.type] || '🌀'} ${session.type.toUpperCase()}</div>
+                            <div>${session.technique}</div>
+                            <div class="session-date">${dateStr}</div>
+                        </div>
+                        <div class="session-duration">${session.duration} min</div>
+                    `;
+                    
+                    container.appendChild(item);
+                });
+            }
+
+            initializeCharts() {
+                // Streak chart (doughnut)
+                const streakCtx = document.getElementById('streak-chart').getContext('2d');
+                this.charts.streak = new Chart(streakCtx, {
+                    type: 'doughnut',
+                    data: {
+                        datasets: [{
+                            data: [this.userData.streak, 30 - this.userData.streak],
+                            backgroundColor: [
+                                'rgba(0, 212, 255, 0.8)',
+                                'rgba(0, 212, 255, 0.1)'
+                            ],
+                            borderWidth: 0
+                        }]
+                    },
+                    options: {
+                        cutout: '70%',
+                        responsive: false,
+                        plugins: {
+                            legend: { display: false },
+                            tooltip: { enabled: false }
+                        }
+                    }
+                });
+                
+                // Sync chart (doughnut)
+                const syncCtx = document.getElementById('sync-chart').getContext('2d');
+                this.charts.sync = new Chart(syncCtx, {
+                    type: 'doughnut',
+                    data: {
+                        datasets: [{
+                            data: [this.calculateNeuralSync(), 100 - this.calculateNeuralSync()],
+                            backgroundColor: [
+                                'rgba(157, 78, 221, 0.8)',
+                                'rgba(157, 78, 221, 0.1)'
+                            ],
+                            borderWidth: 0
+                        }]
+                    },
+                    options: {
+                        cutout: '70%',
+                        responsive: false,
+                        plugins: {
+                            legend: { display: false },
+                            tooltip: { enabled: false }
+                        }
+                    }
+                });
+                
+                // Stress trend chart
+                const stressCtx = document.getElementById('stressChart').getContext('2d');
+                this.charts.stress = new Chart(stressCtx, {
+                    type: 'line',
+                    data: {
+                        labels: ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun'],
+                        datasets: [{
+                            label: 'Stress Level',
+                            data: [6, 5, 7, 4, 5, 3, 4],
+                            borderColor: 'rgb(0, 212, 255)',
+                            backgroundColor: 'rgba(0, 212, 255, 0.1)',
+                            borderWidth: 3,
+                            tension: 0.4,
+                            fill: true,
+                            pointBackgroundColor: 'rgb(10, 14, 23)',
+                            pointBorderColor: 'rgb(0, 212, 255)',
+                            pointBorderWidth: 2,
+                            pointRadius: 6,
+                        }]
+                    },
+                    options: {
+                        responsive: true,
+                        maintainAspectRatio: true,
+                        plugins: {
+                            legend: { display: false },
+                            tooltip: {
+                                backgroundColor: 'rgba(26, 31, 56, 0.9)',
+                                titleColor: 'rgb(0, 212, 255)',
+                                bodyColor: 'rgb(230, 241, 255)',
+                                borderColor: 'rgb(0, 212, 255)',
+                                borderWidth: 1,
+                            }
+                        },
+                        scales: {
+                            y: {
+                                beginAtZero: true,
+                                max: 10,
+                                grid: {
+                                    color: 'rgba(0, 212, 255, 0.1)'
+                                },
+                                ticks: {
+                                    color: 'rgb(136, 146, 176)'
+                                }
+                            },
+                            x: {
+                                grid: {
+                                    color: 'rgba(0, 212, 255, 0.1)'
+                                },
+                                ticks: {
+                                    color: 'rgb(136, 146, 176)'
+                                }
+                            }
+                        }
+                    }
+                });
+                
+                // HRV chart
+                const hrvCtx = document.getElementById('hrv-chart').getContext('2d');
+                this.charts.hrv = new Chart(hrvCtx, {
+                    type: 'line',
+                    data: {
+                        labels: Array.from({length: 24}, (_, i) => i),
+                        datasets: [{
+                            label: 'Heart Rate Variability',
+                            data: Array.from({length: 24}, () => Math.random() * 100 + 50),
+                            borderColor: 'rgb(0, 255, 136)',
+                            backgroundColor: 'rgba(0, 255, 136, 0.1)',
+                            borderWidth: 2,
+                            tension: 0.4,
+                            fill: true
+                        }]
+                    },
+                    options: {
+                        responsive: true,
+                        maintainAspectRatio: false,
+                        plugins: {
+                            legend: { display: false }
+                        },
+                        scales: {
+                            x: { display: false },
+                            y: { display: false }
+                        }
+                    }
+                });
+            }
+
+            updateProgressCharts() {
+                // Update stress chart with actual data
+                if (this.charts.stress) {
+                    const recentSessions = this.userData.sessions.slice(-7);
+                    const stressData = recentSessions.map(s => s.stressAfter).slice(-7);
+                    
+                    // Pad if not enough data
+                    while (stressData.length < 7) {
+                        stressData.unshift(5); // Default value
+                    }
+                    
+                    this.charts.stress.data.datasets[0].data = stressData;
+                    this.charts.stress.update();
+                }
+            }
+
+            toggleVoice() {
+                if (this.voice.isListening) {
+                    this.voice.stop();
+                    this.showNotification('Voice control stopped', 'info');
+                } else {
+                    this.voice.listen((transcript) => {
+                        this.processVoiceCommand(transcript);
+                    });
+                    this.showNotification('Voice control activated. Try saying "breathe" or "emergency"', 'info');
+                }
+            }
+
+            processVoiceCommand(command) {
+                command = command.toLowerCase();
+                
+                // Log the command
+                console.log('Voice command:', command);
+                
+                // Process commands
+                if (command.includes('breathe') || command.includes('breathing')) {
+                    this.navigate('breathing');
+                    this.voice.speak("Opening breathing exercises. Which technique would you like?", 'calm');
+                } else if (command.includes('calm') || command.includes('relax') || command.includes('anxious')) {
+                    this.startSession('breathing', '478');
+                } else if (command.includes('focus') || command.includes('concentrate')) {
+                    this.startSession('breathing', 'box');
+                } else if (command.includes('emergency') || command.includes('panic') || command.includes('help')) {
+                    this.triggerEmergency();
+                } else if (command.includes('stop') || command.includes('end session')) {
+                    this.endSession();
+                } else if (command.includes('pause')) {
+                    if (!this.isPaused) this.togglePause();
+                } else if (command.includes('resume') || command.includes('continue')) {
+                    if (this.isPaused) this.togglePause();
+                } else if (command.includes('dashboard') || command.includes('home')) {
+                    this.navigate('dashboard');
+                } else if (command.includes('meditate') || command.includes('mindfulness')) {
+                    this.navigate('mindfulness');
+                } else if (command.includes('affirmation') || command.includes('positive')) {
+                    this.generateAffirmation();
+                } else if (command.includes('gratitude') || command.includes('thankful')) {
+                    this.navigate('cbt');
+                    setTimeout(() => {
+                        document.getElementById('gratitude-input').focus();
+                    }, 500);
+                } else if (command.includes('how are you') || command.includes('hello')) {
+                    this.voice.speak("I'm here to help you find calm and peace. How can I assist you today?", 'calm');
+                } else {
+                    this.voice.speak("I heard: " + command + ". You can say: breathe, calm, emergency, stop, or dashboard.", 'calm');
+                }
+            }
+
+            populateVoiceSettings() {
+                const select = document.getElementById('voice-select');
+                if (select && this.voice.voices.length > 0) {
+                    // Already populated by VoiceEngine
+                    // Set current values
+                    document.getElementById('rate-slider').value = this.voice.settings.rate;
+                    document.getElementById('pitch-slider').value = this.voice.settings.pitch;
+                }
+            }
+
+            updateVoiceSettings() {
+                const rate = document.getElementById('rate-slider').value;
+                const pitch = document.getElementById('pitch-slider').value;
+                const voiceIndex = document.getElementById('voice-select').value;
+                
+                this.voice.updateSettings(rate, pitch, voiceIndex);
+                this.showNotification('Voice settings updated', 'success');
+            }
+
+            testVoice() {
+                this.voice.speak("This is your NeuroZen voice assistant. I am here to guide you through your therapy sessions.", 'calm');
+            }
+
+            triggerEmergency() {
+                document.getElementById('emergency-modal').classList.add('active');
+                
+                if (this.userData.settings.voiceEnabled) {
+                    this.voice.speak("Emergency protocol activated. You are safe. Follow the grounding techniques on screen.", 'urgent');
+                    
+                    // Auto-read grounding techniques
+                    setTimeout(() => {
+                        this.voice.speak("First, hold ice or splash cold water on your face. This slows your heart rate immediately.", 'urgent');
+                    }, 2000);
+                    
+                    setTimeout(() => {
+                        this.voice.speak("Second, name five things you can see around you. Focus on details.", 'urgent');
+                    }, 8000);
+                    
+                    setTimeout(() => {
+                        this.voice.speak("Third, tap your shoulders alternately. Left, right, left, right.", 'urgent');
+                    }, 14000);
+                }
+                
+                // Log emergency event
+                this.userData.sessions.push({
+                    id: Date.now(),
+                    date: new Date().toISOString(),
+                    type: 'emergency',
+                    technique: 'Emergency Protocol',
+                    duration: 1,
+                    stressBefore: this.userData.stressLevel,
+                    stressAfter: Math.max(1, this.userData.stressLevel - 3)
+                });
+                
+                this.saveUserData();
+                this.updateStressLevel(-2);
+            }
+
+            closeEmergency() {
+                document.getElementById('emergency-modal').classList.remove('active');
+                
+                if (this.userData.settings.voiceEnabled) {
+                    this.voice.speak("Emergency protocol ended. Remember, you are safe and in control.", 'calm');
+                }
+                
+                this.showNotification('Emergency protocol completed. Well done.', 'success');
+            }
+
+            startAmbientMode() {
+                // Subtle background animations and sounds
+                setInterval(() => {
+                    if (!this.currentSession && this.visualizer) {
+                        // Gentle stress level fluctuation when idle
+                        const time = Date.now() * 0.001;
+                        const stressFluctuation = Math.sin(time * 0.1) * 0.3;
+                        const currentStress = this.userData.stressLevel + stressFluctuation;
+                        this.visualizer.updateStressLevel(Math.max(1, Math.min(10, currentStress)));
+                    }
+                }, 10000);
+                
+                // Periodic check-ins
+                setInterval(() => {
+                    if (!this.currentSession && this.userData.settings.notifications) {
+                        const now = new Date();
+                        const hour = now.getHours();
+                        
+                        // Only during daytime hours
+                        if (hour >= 9 && hour <= 21) {
+                            const messages = [
+                                "How are you feeling right now?",
+                                "Would you like to take a moment to breathe?",
+                                "Remember to check in with your stress level.",
+                                "Your mental wellness matters. Take a break if needed."
+                            ];
+                            
+                            const randomMessage = messages[Math.floor(Math.random() * messages.length)];
+                            this.showNotification(randomMessage, 'info');
+                        }
+                    }
+                }, 1800000); // Every 30 minutes
+            }
+
+            showNotification(message, type = 'info') {
+                if (!this.userData.settings.notifications && type !== 'error') return;
+                
+                const notification = document.createElement('div');
+                notification.className = 'notification';
+                notification.textContent = message;
+                
+                // Style based on type
+                if (type === 'error') {
+                    notification.style.borderColor = 'var(--accent-coral)';
+                    notification.style.color = 'var(--accent-coral)';
+                } else if (type === 'success') {
+                    notification.style.borderColor = 'var(--accent-green)';
+                    notification.style.color = 'var(--accent-green)';
+                } else if (type === 'warning') {
+                    notification.style.borderColor = 'var(--accent-yellow)';
+                    notification.style.color = 'var(--accent-yellow)';
+                }
+                
+                document.body.appendChild(notification);
+                
+                // Auto-remove
+                setTimeout(() => {
+                    if (notification.parentNode) {
+                        notification.remove();
+                    }
+                }, 3000);
+            }
+
+            showSettings() {
+                this.navigate('voice');
+            }
+
+            exportData() {
+                const dataStr = JSON.stringify(this.userData, null, 2);
+                const dataBlob = new Blob([dataStr], { type: 'application/json' });
+                const url = URL.createObjectURL(dataBlob);
+                
+                const a = document.createElement('a');
+                a.href = url;
+                a.download = `neurozen-data-${new Date().toISOString().split('T')[0]}.json`;
+                document.body.appendChild(a);
+                a.click();
+                document.body.removeChild(a);
+                URL.revokeObjectURL(url);
+                
+                this.showNotification('Data exported successfully', 'success');
+            }
+        }
+
+        // Initialize app when DOM is loaded
+        let app;
+        document.addEventListener('DOMContentLoaded', () => {
+            app = new NeuroZenApp();
+            
+            // Expose app globally for debugging
+            window.neurozen = app;
+            
+            // Check for service worker support
+            if ('serviceWorker' in navigator) {
+                navigator.serviceWorker.register('/sw.js').catch(err => {
+                    console.log('ServiceWorker registration failed: ', err);
+                });
+            }
+        });
+
+        // Handle online/offline status
+        window.addEventListener('online', () => {
+            document.querySelector('.status-dot').style.background = 'var(--accent-green)';
+            document.querySelector('.status-dot').style.boxShadow = '0 0 10px var(--accent-green)';
+        });
+
+        window.addEventListener('offline', () => {
+            document.querySelector('.status-dot').style.background = 'var(--accent-coral)';
+            document.querySelector('.status-dot').style.boxShadow = '0 0 10px var(--accent-coral)';
+            if (app) {
+                app.showNotification('You are offline. Some features may be limited.', 'warning');
+            }
+        });
+    </script>
+</body>
+</html>

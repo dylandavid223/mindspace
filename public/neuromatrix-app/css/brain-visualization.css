@@ -1,0 +1,394 @@
+/* Brain Visualization Container */
+.brain-container {
+    height: 500px;
+    background: rgba(20, 20, 40, 0.8);
+    border-radius: 20px;
+    margin-bottom: 40px;
+    position: relative;
+    overflow: hidden;
+    border: 1px solid var(--card-border);
+}
+
+#brainCanvas {
+    width: 100%;
+    height: 100%;
+    display: block;
+}
+
+.brain-overlay {
+    position: absolute;
+    bottom: 20px;
+    left: 20px;
+    background: rgba(0, 0, 0, 0.7);
+    padding: 15px;
+    border-radius: 10px;
+    backdrop-filter: blur(10px);
+    max-width: 300px;
+}
+
+.brain-overlay h4 {
+    font-size: 1.2rem;
+    margin-bottom: 5px;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+}
+
+.brain-overlay p {
+    color: var(--text-muted);
+    font-size: 0.9rem;
+}
+
+/* Brain Region Styles */
+.brain-region {
+    position: absolute;
+    border-radius: 50%;
+    pointer-events: none;
+    z-index: 1;
+}
+
+.region-active {
+    animation: region-pulse 2s infinite;
+}
+
+@keyframes region-pulse {
+    0%, 100% { 
+        box-shadow: 0 0 20px rgba(79, 70, 229, 0.5),
+                    0 0 40px rgba(79, 70, 229, 0.3),
+                    0 0 60px rgba(79, 70, 229, 0.1);
+    }
+    50% { 
+        box-shadow: 0 0 30px rgba(79, 70, 229, 0.7),
+                    0 0 60px rgba(79, 70, 229, 0.5),
+                    0 0 90px rgba(79, 70, 229, 0.3);
+    }
+}
+
+/* Neural Pathway Animations */
+.neural-path {
+    position: absolute;
+    height: 1px;
+    background: linear-gradient(90deg, transparent, var(--neuro-blue), transparent);
+    transform-origin: 0 0;
+    pointer-events: none;
+}
+
+.path-active {
+    animation: path-glow 3s infinite;
+}
+
+@keyframes path-glow {
+    0%, 100% { opacity: 0.3; }
+    50% { opacity: 1; }
+}
+
+/* Brain Legend */
+.brain-legend {
+    position: absolute;
+    top: 20px;
+    right: 20px;
+    background: rgba(0, 0, 0, 0.7);
+    padding: 15px;
+    border-radius: 10px;
+    backdrop-filter: blur(10px);
+    font-size: 0.8rem;
+    max-width: 200px;
+}
+
+.legend-item {
+    display: flex;
+    align-items: center;
+    margin-bottom: 8px;
+    color: var(--text-secondary);
+}
+
+.legend-color {
+    width: 12px;
+    height: 12px;
+    border-radius: 50%;
+    margin-right: 10px;
+}
+
+/* Region-specific colors */
+.region-frontal { background: rgba(79, 70, 229, 0.8); }
+.region-parietal { background: rgba(236, 72, 153, 0.8); }
+.region-temporal { background: rgba(16, 185, 129, 0.8); }
+.region-occipital { background: rgba(245, 158, 11, 0.8); }
+.region-cerebellum { background: rgba(139, 92, 246, 0.8); }
+
+/* Enhanced Brain Visualization Styles */
+
+.brain-chart-container {
+    position: absolute;
+    top: 20px;
+    right: 20px;
+    background: rgba(0, 0, 0, 0.7);
+    padding: 20px;
+    border-radius: 10px;
+    backdrop-filter: blur(10px);
+    max-width: 300px;
+    color: white;
+    font-family: 'Inter', sans-serif;
+    z-index: 10;
+    border: 1px solid rgba(99, 102, 241, 0.3);
+    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.5);
+    animation: slideIn 0.5s ease-out;
+}
+
+@keyframes slideIn {
+    from {
+        opacity: 0;
+        transform: translateX(30px);
+    }
+    to {
+        opacity: 1;
+        transform: translateX(0);
+    }
+}
+
+.brain-chart-container h4 {
+    font-size: 1.2rem;
+    margin-bottom: 15px;
+    color: var(--text-secondary);
+    display: flex;
+    align-items: center;
+    gap: 10px;
+}
+
+.brain-chart-container .region-bar {
+    margin-bottom: 12px;
+}
+
+.brain-chart-container .region-header {
+    display: flex;
+    justify-content: space-between;
+    margin-bottom: 5px;
+}
+
+.brain-chart-container .region-name {
+    font-size: 0.85rem;
+    color: var(--text-secondary);
+}
+
+.brain-chart-container .region-percentage {
+    font-size: 0.85rem;
+    font-weight: 600;
+    color: var(--text-primary);
+}
+
+.brain-chart-container .progress-bar {
+    height: 6px;
+    background: rgba(255, 255, 255, 0.1);
+    border-radius: 3px;
+    overflow: hidden;
+}
+
+.brain-chart-container .progress-fill {
+    height: 100%;
+    border-radius: 3px;
+    transition: width 1s ease-out;
+}
+
+/* Insights overlay improvements */
+.brain-overlay .insights {
+    margin-top: 15px;
+    padding-top: 15px;
+    border-top: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+.brain-overlay .insights h5 {
+    font-size: 0.9rem;
+    margin-bottom: 8px;
+    color: var(--text-secondary);
+    display: flex;
+    align-items: center;
+    gap: 8px;
+}
+
+.brain-overlay .insights ul {
+    list-style: none;
+    padding-left: 0;
+    margin: 0;
+}
+
+.brain-overlay .insights li {
+    font-size: 0.8rem;
+    color: var(--text-muted);
+    margin-bottom: 5px;
+    padding-left: 15px;
+    position: relative;
+}
+
+.brain-overlay .insights li:before {
+    content: "•";
+    color: var(--neuro-blue);
+    position: absolute;
+    left: 0;
+}
+
+/* Activity indicators */
+.activity-indicator {
+    position: absolute;
+    width: 8px;
+    height: 8px;
+    border-radius: 50%;
+    pointer-events: none;
+    z-index: 5;
+}
+
+.activity-pulse {
+    animation: activityPulse 2s infinite;
+}
+
+@keyframes activityPulse {
+    0% {
+        transform: scale(0.8);
+        opacity: 0.7;
+    }
+    50% {
+        transform: scale(1.2);
+        opacity: 1;
+    }
+    100% {
+        transform: scale(0.8);
+        opacity: 0.7;
+    }
+}
+
+/* Connection strength indicators */
+.connection-strength {
+    position: absolute;
+    font-size: 0.7rem;
+    color: rgba(255, 255, 255, 0.7);
+    background: rgba(0, 0, 0, 0.5);
+    padding: 2px 6px;
+    border-radius: 10px;
+    pointer-events: none;
+    z-index: 3;
+}
+
+/* Tooltip for brain regions */
+.brain-tooltip {
+    position: absolute;
+    background: rgba(0, 0, 0, 0.8);
+    color: white;
+    padding: 10px;
+    border-radius: 6px;
+    font-size: 0.8rem;
+    max-width: 200px;
+    z-index: 100;
+    pointer-events: none;
+    backdrop-filter: blur(10px);
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    animation: fadeIn 0.2s ease-out;
+}
+
+@keyframes fadeIn {
+    from { opacity: 0; }
+    to { opacity: 1; }
+}
+
+.brain-tooltip h5 {
+    margin: 0 0 5px 0;
+    color: var(--text-primary);
+    font-size: 0.9rem;
+}
+
+.brain-tooltip p {
+    margin: 0;
+    color: var(--text-muted);
+    font-size: 0.75rem;
+}
+
+/* Performance optimization for animations */
+@media (prefers-reduced-motion: reduce) {
+    .brain-chart-container,
+    .brain-tooltip,
+    .activity-pulse {
+        animation: none;
+    }
+}
+
+/* Mobile optimizations */
+@media (max-width: 768px) {
+    .brain-chart-container {
+        position: relative;
+        top: auto;
+        right: auto;
+        max-width: none;
+        margin: 10px;
+        font-size: 0.9rem;
+    }
+    
+    .brain-overlay {
+        position: relative;
+        bottom: auto;
+        left: auto;
+        max-width: none;
+        margin: 10px;
+    }
+}
+
+/* Chart Controls */
+.chart-controls {
+    position: absolute;
+    top: 20px;
+    left: 20px;
+    display: flex;
+    gap: 10px;
+    z-index: 10;
+}
+
+.chart-toggle-btn {
+    background: rgba(0, 0, 0, 0.7);
+    border: 1px solid rgba(99, 102, 241, 0.3);
+    color: white;
+    padding: 8px 16px;
+    border-radius: 20px;
+    cursor: pointer;
+    font-size: 0.9rem;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    transition: all 0.3s ease;
+    backdrop-filter: blur(10px);
+}
+
+.chart-toggle-btn:hover {
+    background: rgba(99, 102, 241, 0.3);
+    transform: translateY(-2px);
+}
+
+.chart-legend {
+    background: rgba(0, 0, 0, 0.7);
+    border: 1px solid rgba(99, 102, 241, 0.3);
+    padding: 15px;
+    border-radius: 10px;
+    backdrop-filter: blur(10px);
+    max-width: 250px;
+}
+
+.legend-item {
+    display: flex;
+    align-items: center;
+    margin-bottom: 8px;
+    font-size: 0.8rem;
+}
+
+.legend-color {
+    width: 12px;
+    height: 12px;
+    border-radius: 50%;
+    margin-right: 10px;
+    border: 2px solid rgba(255, 255, 255, 0.3);
+}
+
+/* Modal styles */
+.modal-backdrop {
+    animation: fadeIn 0.3s ease-out;
+}
+
+@keyframes fadeIn {
+    from { opacity: 0; }
+    to { opacity: 1; }
+}
